@@ -1,0 +1,78 @@
+.step-wizard {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px 0;
+  background-color: #f8f9fa; /* Light background */
+  font-family: 'Poppins', sans-serif;
+}
+
+.step-wizard-list {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.step-wizard-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding: 10px 20px;
+  color: #6c757d; /* Default text color */
+  flex-grow: 1; /* Allow the item to grow */
+}
+
+.step-wizard-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 100%; /* Position to the right of the item */
+  transform: translateY(-50%);
+  height: 2px;
+  width: 100%;
+  background-color: #e9ecef; /* Default line color */
+  z-index: -1;
+}
+
+.step-wizard-item.current-item {
+  color: #007bff;
+}
+
+.step-wizard-item.completed-item {
+  color: #28a745;
+}
+
+.step-wizard-item.completed-item:not(:last-child)::after {
+  background-color: #28a745; /* Line color for completed steps */
+}
+
+.progress-count {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #e9ecef;
+  color: #6c757d;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.current-item .progress-count {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.completed-item .progress-count {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.progress-label {
+  font-size: 14px;
+  font-weight: 500;
+}
