@@ -70,7 +70,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import Navbar from '../Processing.vue'; // Verify import paths
+import Navbar from '../layout/Processing.vue';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 

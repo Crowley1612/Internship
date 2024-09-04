@@ -77,7 +77,7 @@
   
   <script>
   import { ref, reactive, onMounted } from 'vue';
-  import NavBar from '../Processing.vue'; // Update the path as needed
+  import NavBar from '../layout/Processing.vue';
   import Sidebar from '../layout/Sidebar.vue';
   import Header from '../layout/Header.vue';
   

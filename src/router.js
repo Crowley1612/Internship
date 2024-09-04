@@ -1,19 +1,24 @@
-import Forgotpassword from "./components/Forgotpassword.vue";
-import Login from "./components/Login.vue";
-import Signup from "./components/Signup.vue";
-import MasterPage from "./components/MasterPage.vue";
+//Phase01
+import Login from "./components/phase01/Login.vue";
+import Signup from "./components/phase01/Signup.vue";
+import Forgotpassword from "./components/phase01/Forgotpassword.vue";
+//Phase02
+import MasterPage from "./components/phase02/MasterPage.vue";
+//Phase03
 import UploadFile from "./components/Signature/UploadFile.vue";
 import Step01 from "./components/signature/Step01.vue";
 import AddPerson from "./components/signature/Step02.vue";
 import Display from "./components/signature/Step03.vue";
 import Confirm from "./components/signature/Step04.vue";
+//Layout
 import { createRouter, createWebHistory } from "vue-router";
 import Sidebar from "./components/layout/Sidebar.vue";
 import Header from "./components/layout/Header.vue";
 import BottomButton from "./components/layout/BottomButton.vue";
-import Processing from "./components/Processing.vue";
-import test from "./components/test.vue";
-import Test02 from "./components/Test02.vue";
+import Processing from "./components/layout/Processing.vue";
+//Test
+import test from "./components/testFile/test.vue";
+import Test02 from "./components/testFile/Test02.vue";
 const routes = [
   {
     name: "Home",

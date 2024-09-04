@@ -66,7 +66,6 @@
 <script setup>
 import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
-import NavBar from "./Processing.vue";
 
 // Ensure the correct path to the worker script
 GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs';
@@ -278,5 +277,5 @@ const totalEmails = computed(() => linkedList.value.length > 0 ? Math.max(...lin
 </script>
 
 <style scoped>
-@import '../assets/Display.css';
+/* @import '../assets/Display.css'; */
 </style>

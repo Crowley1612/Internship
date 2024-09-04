@@ -2,9 +2,7 @@
   <div class="signUpForm container-fluid d-flex justify-content-center align-items-center min-vh-100">
     <VForm @submit.prevent="submitForm" class="w-100">
       <div class="login card shadow-sm p-4">
-        <img
-          src="@/assets/download.png"
-          alt="" class="img">
+        <img src="@/assets/download.png" alt="" class="img">
         <h1 class="center card-title">Đăng ký tài khoản</h1>
         <div class="card-body">
           <div class="form-group mb-3">
@@ -123,5 +121,5 @@ export default {
 </script>
 
 <style scoped>
-  @import '../assets/Signup.css';
+@import '@/assets/Signup.css';
 </style>

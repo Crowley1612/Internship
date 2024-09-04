@@ -136,7 +136,7 @@
 import axios from 'axios';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
-import Navbar from '../Processing.vue';
+import Navbar from '../layout/Processing.vue';
 
 export default {
   name: 'AddPerson',

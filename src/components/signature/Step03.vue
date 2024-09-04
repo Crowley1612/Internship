@@ -72,7 +72,7 @@
 import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
 import * as pdfjsLib from "pdfjs-dist/build/pdf.mjs";
-import NavBar from '../Processing.vue';
+import Navbar from '../layout/Processing.vue';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 import { useRouter } from 'vue-router';

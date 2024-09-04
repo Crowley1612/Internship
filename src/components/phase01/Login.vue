@@ -149,5 +149,108 @@ export default {
 </script>
 
 <style scoped>
-  @import '../assets/Login.css';
+.wrapper {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f2f5; /* Softer background color */
+}
+
+.inner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 20px; /* Adds spacing between elements */
+}
+
+.image-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.background-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(70%); 
+}
+
+.text-overlay {
+  position: absolute;
+  top: 50%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  text-align: left;
+  color: #ffffff;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Add shadow for depth */
+  max-width: 80%; /* Prevents text from stretching too wide */
+}
+
+.login-box {
+  background-color: #F5F5F5;
+  padding: 40px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow */
+  width: 400px; /* Fixed width for better alignment */
+  max-width: 90%; /* Ensure responsiveness */
+  height: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px; /* Rounded corners */
+  margin: 20px;
+}
+
+.password-toggle {
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.password-toggle img {
+  width: 24px; /* Slightly larger icon */
+  height: auto;
+}
+
+.or {
+  color: #606770;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.img {
+  margin: 0 auto;
+  display: block;
+}
+
+a i {
+  margin-right: 8px; /* Adjust the spacing as needed */
+}
+
+
+@media (max-width: 768px) {
+  .text-overlay {
+    font-size: 14px; 
+    padding: 15px;
+  }
+
+  .login-box {
+    width: 100%;
+    padding: 30px;
+  }
+}
 </style>

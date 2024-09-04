@@ -89,9 +89,9 @@
 <script setup>
 import { ref, onMounted, watch, nextTick } from 'vue';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
-import NavBar from './Processing.vue';
-import Sidebar from './layout/Sidebar.vue';
-import Header from './layout/Header.vue';
+// import NavBar from "../Processing.vue";
+// import Sidebar from './layout/Sidebar.vue';
+// import Header from './layout/Header.vue';
 // Configure PDF.js worker
 GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs';
 
