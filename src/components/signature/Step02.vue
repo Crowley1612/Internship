@@ -58,8 +58,13 @@
                 <div class="col-auto">
                   <input type="email" v-model="signer.email" class="form-control"
                     :class="{ 'is-invalid': signerErrors[index]?.email }" placeholder="Nhập email" required>
-                  <div v-if="showErrors && signerErrors[index].email" class="error-message">
-                    Vui lòng nhập đúng định dạng email.
+                  <div v-if="showErrors">
+                    <div v-if="signerErrors[index].email === ''" class="error-message">
+                      Email không được để trống.
+                    </div>
+                    <div v-else-if="signerErrors[index].email" class="error-message">
+                      Vui lòng nhập đúng định dạng email.
+                    </div>
                   </div>
                 </div>
                 <div class="col-auto">
@@ -149,7 +154,6 @@ export default {
     return {
       signers: [
         { name: '', email: '', method: 'Ký số' },
-        { name: '', email: '', method: 'Ký số' }
       ],
       recipients: [{ name: '', email: '', method: 'Nhận bản sao' }],
       signerErrors: [{}, {}],
