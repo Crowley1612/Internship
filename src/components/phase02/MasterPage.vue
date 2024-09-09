@@ -93,8 +93,11 @@
               </a>
             </li>
             <div class="ml-2">
-              <select class="custom-select" v-model.number="currentPage" @change="changePage(currentPage)">
-                <option v-for="page in totalPages" :key="page" :value="page">{{ page }} / {{ totalPages }}</option>
+              <select class="custom-select" v-model.number="itemsPerPage" @change="updatePageSize">
+                <option :value="5">5 items/page</option>
+                <option :value="10">10 items/page</option>
+                <option :value="20">20 items/page</option>
+                <option :value="50">50 items/page</option>
               </select>
             </div>
             <div class="ml-2 flex-container">
@@ -235,7 +238,7 @@ export default {
       startDate: null,
       endDate: null,
       currentPage: 1,
-      itemsPerPage: 8,
+      itemsPerPage: 10,
       activeMenu: null,
       showSearchInput: {
         maVB: '',
@@ -288,7 +291,10 @@ export default {
       if (hour < 18) return 'Chào buổi chiều,';
       return 'Chào buổi tối,';
     },
-
+    totalPages() {
+      // Tính toán tổng số trang dựa trên tổng số item và số lượng item trên mỗi trang
+      return Math.ceil(this.totalItems / this.itemsPerPage);
+    },
     filteredDocuments() {
       const filtered = this.documents.filter(document => {
         const matchesSearch = this.searchQuery
@@ -376,6 +382,17 @@ export default {
       const end = new Date(endDate);
 
       return date >= start && date <= end;
+    },
+    changePage(page) {
+      // Phương thức chuyển trang
+      this.currentPage = page;
+      // Gọi API hoặc làm gì đó để cập nhật danh sách item của trang hiện tại
+      console.log(`Current page: ${this.currentPage}`);
+    },
+    updatePageSize() {
+      // Khi số lượng item trên mỗi trang thay đổi, cần tính lại tổng số trang và đặt lại currentPage
+      this.currentPage = 1; // Đặt lại trang về 1 mỗi khi thay đổi số lượng item trên mỗi trang
+      console.log(`Items per page: ${this.itemsPerPage}`);
     },
     filterDocuments() {
       this.currentPage = 1;

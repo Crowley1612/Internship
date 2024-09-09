@@ -1,83 +1,63 @@
 <template>
-  <a-form
-    :model="formState"
-    name="normal_login"
-    class="login-form"
-    @finish="onFinish"
-    @finishFailed="onFinishFailed"
-  >
-    <a-form-item
-      label="Username"
-      name="username"
-      :rules="[{ required: true, message: 'Please input your username!' }]"
-    >
-      <a-input v-model:value="formState.username">
-        <template #prefix>
-          <UserOutlined class="site-form-item-icon" />
-        </template>
-      </a-input>
-    </a-form-item>
-
-    <a-form-item
-      label="Password"
-      name="password"
-      :rules="[{ required: true, message: 'Please input your password!' }]"
-    >
-      <a-input-password v-model:value="formState.password">
-        <template #prefix>
-          <LockOutlined class="site-form-item-icon" />
-        </template>
-      </a-input-password>
-    </a-form-item>
-
-    <a-form-item>
-      <a-form-item name="remember" no-style>
-        <a-checkbox v-model:checked="formState.remember">Remember me</a-checkbox>
-      </a-form-item>
-      <a class="login-form-forgot" href="">Forgot password</a>
-    </a-form-item>
-
-    <a-form-item>
-      <a-button :disabled="disabled" type="primary" html-type="submit" class="login-form-button">
-        Log in
-      </a-button>
-      Or
-      <a href="">register now!</a>
-    </a-form-item>
-  </a-form>
+  <a-card>
+    <div class="info-header">
+      <h2>Thông tin cơ bản</h2>
+      <a-button type="text" class="edit-button" @click="onEdit">Thay đổi thông tin</a-button>
+    </div>
+    <div class="info-content">
+      <div class="info-item">
+        <span class="label">Họ và tên:</span>
+        <span class="value">Đỗ Thị Thu Hằng 1</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Mã số thuế:</span>
+        <span class="value">0103930279</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Công ty:</span>
+        <span class="value">Nacencomm SCT</span>
+      </div>
+    </div>
+  </a-card>
 </template>
-<script lang="ts" setup>
-import { reactive, computed } from 'vue';
-import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
-interface FormState {
-  username: string;
-  password: string;
-  remember: boolean;
-}
-const formState = reactive<FormState>({
-  username: '',
-  password: '',
-  remember: true,
-});
-const onFinish = (values: any) => {
-  console.log('Success:', values);
-};
 
-const onFinishFailed = (errorInfo: any) => {
-  console.log('Failed:', errorInfo);
+<script>
+export default {
+  name: 'UserInfoCard',
+  methods: {
+    onEdit() {
+      // Handle edit action
+      console.log('Edit button clicked');
+    }
+  }
 };
-const disabled = computed(() => {
-  return !(formState.username && formState.password);
-});
 </script>
+
 <style scoped>
-#components-form-demo-normal-login .login-form {
-  max-width: 300px;
+.info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
-#components-form-demo-normal-login .login-form-forgot {
-  float: right;
+
+.edit-button {
+  color: #1890ff;
 }
-#components-form-demo-normal-login .login-form-button {
-  width: 100%;
+
+.info-content {
+  margin-top: 10px;
+}
+
+.info-item {
+  margin-bottom: 10px;
+}
+
+.label {
+  font-weight: bold;
+}
+
+.value {
+  margin-left: 10px;
 }
 </style>

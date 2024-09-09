@@ -33,10 +33,11 @@
                             </a>
                         </li>
                         <div class="ml-2">
-                            <select class="custom-select" v-model.number="currentPage"
-                                @change="changePage(currentPage)">
-                                <option v-for="page in totalPages" :key="page" :value="page">{{ page }} / {{ totalPages
-                                    }}</option>
+                            <select class="custom-select" v-model.number="itemsPerPage" @change="updatePageSize">
+                                <option :value="5">5 items/page</option>
+                                <option :value="10">10 items/page</option>
+                                <option :value="20">20 items/page</option>
+                                <option :value="50">50 items/page</option>
                             </select>
                         </div>
                         <div class="ml-2 flex-container">
@@ -51,7 +52,6 @@
                         <thead class="thead-light sticky-header">
                             <tr>
                                 <th>STT</th>
-
                                 <!-- Email tài khoản column -->
                                 <th>
                                     <div class="search-container">
@@ -120,9 +120,8 @@
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
-
                         <tbody>
-                            <tr v-for="(item, index) in sortedDocuments" :key="index">
+                            <tr v-for="(item, index) in paginatedDocuments" :key="index">
                                 <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
                                 <td>{{ item.email }}</td>
                                 <td>{{ item.customer_name }}</td>
@@ -130,10 +129,14 @@
                                 <td>{{ item.tax_code }}</td>
                                 <td>{{ item.organization_name }}</td>
                                 <td>
-                                    <a class="dropdown-item" @click="fixDocument(item)"><i
-                                            class="bi bi-pencil-square"></i> Sửa</a>
-                                    <a class="dropdown-item text-danger" @click="deleteDocument(item)"><i
-                                            class="bi bi-trash3"></i> Xóa</a>
+                                    <!-- Edit (Update) Action -->
+                                    <a class="dropdown-item" @click="openEditModal(item)">
+                                        <i class="bi bi-pencil-square"></i> Sửa
+                                    </a>
+                                    <!-- Delete Action -->
+                                    <a class="dropdown-item text-danger" @click="deleteDocument(item)">
+                                        <i class="bi bi-trash3"></i> Xóa
+                                    </a>
                                 </td>
                             </tr>
                         </tbody>
@@ -143,6 +146,7 @@
         </div>
     </div>
 </template>
+
 
 
 
@@ -168,11 +172,11 @@ export default {
                 organization_name: ''
             },
             currentPage: 1,
-            itemsPerPage: 8,
+            itemsPerPage: 10,
             gotoPage: 1,
             sortKey: '',
             sortOrder: 'asc',
-            currentDocument: null // Define currentDocument here
+            currentDocument: null,
         };
     },
     created() {
@@ -189,32 +193,62 @@ export default {
                 return matchesEmail && matchesName && matchesPhone && matchesTaxCode && matchesOrganization;
             });
         },
-        sortedDocuments() {
-            const sorted = [...this.filteredDocuments];
-            if (!this.sortKey) return sorted;
-
-            return sorted.sort((a, b) => {
-                let result = a[this.sortKey] > b[this.sortKey] ? 1 : -1;
-                return this.sortOrder === 'asc' ? result : -result;
-            });
-        },
         totalPages() {
             return Math.ceil(this.filteredDocuments.length / this.itemsPerPage);
+        },
+        paginatedDocuments() {
+            const start = (this.currentPage - 1) * this.itemsPerPage;
+            const end = start + this.itemsPerPage;
+            return this.sortedDocuments.slice(start, end);
+        },
+        sortedDocuments() {
+            if (!this.sortKey) return this.filteredDocuments;
+
+            return this.filteredDocuments.sort((a, b) => {
+                const comparison = a[this.sortKey] > b[this.sortKey] ? 1 : -1;
+                return this.sortOrder === 'asc' ? comparison : -comparison;
+            });
         }
     },
     methods: {
-        async deleteDocument(document) {
+        // async deleteDocument(document) {
+        //     if (confirm('Bạn có chắc chắn muốn xóa người này?')) {
+        //         try {
+        //             await axios.delete(`https://your-api-endpoint/documents/${document.id}`); // Replace with actual endpoint
+        //             this.fetchData(); // Refresh the contact list
+        //         } catch (error) {
+        //             console.error('Error deleting document:', error);
+        //         }
+        //     }
+        // },
+        deleteDocument(document) {
             if (confirm('Bạn có chắc chắn muốn xóa người này?')) {
+                // Remove the document from the local documents array
+                this.documents = this.documents.filter(item => item.id !== document.id);
+            }
+        },
+        openEditModal(item) {
+            this.currentDocument = { ...item }; // Clone the item to be edited
+            // You can implement a modal or form to edit the document here
+            // For example, show a modal with the currentDocument data
+        },
+        async updateDocument() {
+            if (this.currentDocument) {
                 try {
-                    await axios.delete(`/src/data/contact.json/${document.id}`); // Adjust API endpoint as needed
-                    this.fetchData();
+                    await axios.put(`https://your-api-endpoint/documents/${this.currentDocument.id}`, this.currentDocument); // Replace with actual endpoint
+                    this.fetchData(); // Refresh the contact list
+                    this.currentDocument = null; // Clear the current document after update
                 } catch (error) {
-                    console.error('Error deleting document:', error);
+                    console.error('Error updating document:', error);
                 }
             }
         },
-        fixDocument(item) {
-            this.currentDocument = { ...item }; // Store the current document
+        changePage(page) {
+            if (page < 1 || page > this.totalPages) return;
+            this.currentPage = page;
+        },
+        updatePageSize() {
+            this.currentPage = 1;
         },
         fetchData() {
             axios.get('/src/data/contact.json')
@@ -225,10 +259,6 @@ export default {
                     console.error('Error fetching data:', error);
                 });
         },
-        changePage(page) {
-            if (page < 1 || page > this.totalPages) return;
-            this.currentPage = page;
-        },
         goToPage() {
             this.changePage(this.gotoPage);
         },
@@ -238,6 +268,9 @@ export default {
         toggleSearch(field) {
             this.searchField = this.searchField === field ? '' : field;
         },
+        fixDocument(item) {
+            this.currentDocument = { ...item };
+        },
         setSortKey(key) {
             this.sortOrder = this.sortKey === key && this.sortOrder === 'asc' ? 'desc' : 'asc';
             this.sortKey = key;
@@ -245,6 +278,7 @@ export default {
     }
 };
 </script>
+
 
 
 

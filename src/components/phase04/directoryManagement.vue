@@ -31,8 +31,11 @@
                             </a>
                         </li>
                         <div class="ml-2">
-                            <select class="custom-select" v-model.number="currentPage" @change="changePage(currentPage)">
-                                <option v-for="page in totalPages" :key="page" :value="page">{{ page }} / {{ totalPages }}</option>
+                            <select class="custom-select" v-model.number="itemsPerPage" @change="updatePageSize">
+                                <option :value="5">5 items/page</option>
+                                <option :value="10">10 items/page</option>
+                                <option :value="20">20 items/page</option>
+                                <option :value="50">50 items/page</option>
                             </select>
                         </div>
                         <div class="ml-2 flex-container">
@@ -48,40 +51,29 @@
                         <thead class="thead-light sticky-header">
                             <tr>
                                 <th>STT</th>
-
-                                <!-- directory_name column -->
                                 <th>
                                     <div class="search-container">
                                         Tên danh mục
                                         <i class="bi bi-search" @click="toggleSearch('directory_name')"></i>
                                         <div v-if="searchField === 'directory_name'" class="search-box">
-                                            <input type="text" placeholder="Nhập tên danh mục"
-                                                v-model="searchQueries.directory_name" @input="filterDocuments"
-                                                class="input-search" />
+                                            <input type="text" placeholder="Nhập tên danh mục" v-model="searchQueries.directory_name" @input="filterDocuments" class="input-search" />
                                         </div>
                                     </div>
                                 </th>
-
-                                <!-- note column -->
                                 <th>
                                     <div class="search-container">
                                         Ghi chú
                                         <i class="bi bi-search" @click="toggleSearch('note')"></i>
                                         <div v-if="searchField === 'note'" class="search-box">
-                                            <input type="text" placeholder="Nhập ghi chú"
-                                                v-model="searchQueries.note" @input="filterDocuments"
-                                                class="input-search" />
+                                            <input type="text" placeholder="Nhập ghi chú" v-model="searchQueries.note" @input="filterDocuments" class="input-search" />
                                         </div>
                                     </div>
                                 </th>
-
-                                <!-- Actions column -->
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
-
                         <tbody>
-                            <tr v-for="(item, index) in sortedDocuments" :key="index">
+                            <tr v-for="(item, index) in paginatedDocuments" :key="index">
                                 <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
                                 <td>{{ item.directory_name }}</td>
                                 <td>{{ item.note }}</td>
@@ -106,8 +98,7 @@
                     <button type="button" class="btn-close" @click="currentDocument = null"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" v-model="currentDocument.directory_name" class="form-control"
-                        placeholder="Tên danh mục">
+                    <input type="text" v-model="currentDocument.directory_name" class="form-control" placeholder="Tên danh mục">
                     <textarea v-model="currentDocument.note" class="form-control" placeholder="Ghi chú"></textarea>
                 </div>
                 <div class="modal-footer">
@@ -118,6 +109,7 @@
         </div>
     </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -138,12 +130,11 @@ export default {
                 note: ''
             },
             currentPage: 1,
-            itemsPerPage: 6,
+            itemsPerPage: 5,
             gotoPage: 1,
             sortKey: '',
             sortOrder: 'asc',
-            currentDocument: null, // Define currentDocument here
-            totalPages: 0 // Initialize totalPages
+            currentDocument: null,
         };
     },
     created() {
@@ -156,6 +147,11 @@ export default {
                 const matchesNote = document.note.toLowerCase().includes(this.searchQueries.note.toLowerCase());
                 return matchesDirectoryName && matchesNote;
             });
+        },
+        paginatedDocuments() {
+            const start = (this.currentPage - 1) * this.itemsPerPage;
+            const end = start + this.itemsPerPage;
+            return this.sortedDocuments.slice(start, end);
         },
         sortedDocuments() {
             const sorted = [...this.filteredDocuments];
@@ -183,8 +179,16 @@ export default {
                 }
             }
         },
+        changePage(page) {
+            if (page >= 1 && page <= this.totalPages) {
+                this.currentPage = page;
+            }
+        },
+        updatePageSize() {
+            this.currentPage = 1;
+        },
         editDocument(item) {
-            this.currentDocument = { ...item }; // Store the current document
+            this.currentDocument = { ...item };
         },
         async updateDocument() {
             if (this.currentDocument) {
@@ -203,16 +207,10 @@ export default {
             axios.get('/src/data/directory.json')
                 .then(response => {
                     this.documents = response.data;
-                    this.totalPages = Math.ceil(this.documents.length / this.itemsPerPage); // Update totalPages dynamically
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
                 });
-        },
-        changePage(page) {
-            if (page >= 1 && page <= this.totalPages) {
-                this.currentPage = page;
-            }
         },
         goToPage() {
             if (this.gotoPage >= 1 && this.gotoPage <= this.totalPages) {
@@ -225,15 +223,12 @@ export default {
             this.currentPage = 1;
         },
         toggleSearch(field) {
-            this.searchField = this.searchField === field ? '' : field; // Toggle between fields
+            this.searchField = this.searchField === field ? '' : field;
         },
-        setSortKey(key) {
-            this.sortOrder = this.sortKey === key && this.sortOrder === 'asc' ? 'desc' : 'asc';
-            this.sortKey = key;
-        }
     }
 };
 </script>
+
 
 <style scoped>
 @import '@/assets/MasterPage.css';

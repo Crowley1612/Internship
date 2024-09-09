@@ -10,7 +10,7 @@
     <div class="inner">
       <div class="login-box container bg-light p-4 rounded shadow-sm">
         <img
-          src="../assets/download.png"
+          src="../assets/d.png"
           alt="" class="img">
         <h1 class="text-center">Đăng nhập</h1>
         <Form @submit="handleSubmit" v-slot="{ errors }">
