@@ -11,7 +11,7 @@
               <button @click="toggleEmailSelect" class="btn btn-info">
                 {{ showEmailSelect ? 'Ẩn Chọn Người Ký' : '+ Thêm Vùng Ký' }}
               </button>
-              <div v-if="showEmailSelect" class="email-select-container">
+              <div v-if="showEmailSelect">
                 <label for="email-select">Chọn người ký và Trình Tự Ký:</label>
                 <select v-model="selectedEmails" id="email-select" multiple @change="updateLinkedList">
                   <option v-for="(item, index) in linkedList" :key="index" :value="item.email">
@@ -67,19 +67,17 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
-import * as pdfjsLib from "pdfjs-dist/build/pdf.mjs";
 import Navbar from '../layout/Processing.vue';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 import { useRouter } from 'vue-router';
-// Configure PDF.js worker
+
 GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs';
 const router = useRouter();
-// Reactive properties
+
 const pdfFiles = ref([]);
 const pdfUrl = ref('');
 const signatureAreas = ref([]);
@@ -107,20 +105,19 @@ const handleNext = () => {
 
 // On component mount
 onMounted(async () => {
-  // Load PDF files from local storage
   loadPdfFilesFromLocalStorage();
+  await fetchSigners(); // Fetch only signers
 
-  // Fetch email list
-  await fetchEmailList();
+  if (linkedList.value.length > 0) {
+    selectedEmails.value = linkedList.value.map(item => item.email);
+  }
 
-  // Render PDF if URL is provided
   if (pdfUrl.value) {
     await nextTick();
     await renderPdf(pdfUrl.value);
   }
 });
 
-// Watch for changes in pdfUrl
 watch(pdfUrl, async (newUrl) => {
   if (newUrl) {
     await nextTick();
@@ -138,37 +135,29 @@ const loadPdfFilesFromLocalStorage = () => {
         name: "10",
         url: "https://pdfobject.com/pdf/sample.pdf"
       }
-    ]
+    ];
   }
 };
 
-const fetchEmailList = async () => {
+const fetchSigners = async () => {
   try {
-    const savedContacts = localStorage.getItem('formData');
+    const savedContacts = localStorage.getItem('signersRecipientsData');
     if (savedContacts) {
       const data = JSON.parse(savedContacts);
-      emailList.value = [
-        ...data.signers.map(signer => signer.email),
-        ...data.recipients.map(recipient => recipient.email)
-      ];
-      if (emailList.value.length > 0) {
-        selectedEmails.value = [emailList.value[0]];
-      }
+      linkedList.value = data.signers.map((signer, index) => ({ email: signer.email, order: index + 1 }));
+      selectedEmails.value = linkedList.value.map(item => item.email);
     } else {
-      console.warn('Không tìm thấy dữ liệu trong localStorage.');
+      console.warn('No signers list found in localStorage.');
     }
   } catch (error) {
-    console.error('Lỗi tải danh sách email:', error.message);
+    console.error('Error fetching signers list:', error.message);
   }
 };
 
-
-// Function to show selected PDF
 const showPdf = (file) => {
   pdfUrl.value = file.url;
 };
 
-// Function to render PDF
 const renderPdf = async (url) => {
   try {
     const container = containerRef.value;
@@ -214,7 +203,6 @@ const renderPdf = async (url) => {
 
 // Function to start drawing
 const startDrawing = (pageNum, event) => {
-  console.log("Start Drawing", { pageNum, event });
   if (isDrawing.value === false && signatureAreas.value.length >= linkedList.value.length) {
     alert('Đã hoàn thành việc vẽ vùng ký cho tất cả người ký.');
     return;
@@ -240,11 +228,7 @@ const startDrawing = (pageNum, event) => {
 
 // Function to draw the rectangle
 const draw = (event) => {
-  console.log("Drawing", event);
   if (!isDrawing.value) return;
-
-  const container = containerRef.value;
-  if (!container) return;
 
   const canvas = event.target;
   const rect = canvas.getBoundingClientRect();
@@ -257,14 +241,15 @@ const draw = (event) => {
     height: Math.abs(currentY - startY),
   };
 
-  // Optionally draw the rectangle as feedback
-  context.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas for testing
-  context.strokeRect(drawingArea.value.x, drawingArea.value.y, drawingArea.value.width, drawingArea.value.height);
+  const context = canvas.getContext('2d');
+  if (context) {
+    context.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas for testing
+    context.strokeRect(drawingArea.value.x, drawingArea.value.y, drawingArea.value.width, drawingArea.value.height);
+  }
 };
 
 // Function to end drawing
 const endDrawing = (event) => {
-  console.log("End Drawing", event);
   if (!isDrawing.value) return;
 
   isDrawing.value = false;
@@ -294,9 +279,11 @@ const endDrawing = (event) => {
 // Function to toggle email select dropdown
 const toggleEmailSelect = () => {
   showEmailSelect.value = !showEmailSelect.value;
+  if (showEmailSelect.value) {
+    fetchSigners(); // Fetch signers if dropdown is shown
+  }
 };
 
-// Function to add a signer to the list
 const addSigner = (email, order) => {
   const existingIndex = linkedList.value.findIndex(signer => signer.order === order);
   if (existingIndex !== -1) {
@@ -309,7 +296,6 @@ const addSigner = (email, order) => {
       linkedList.value[i].order += 1;
     }
   } else {
-    // Nếu không có người ký với thứ tự trùng, thêm trực tiếp vào danh sách
     linkedList.value.push({
       email: email,
       order: order,
@@ -317,29 +303,17 @@ const addSigner = (email, order) => {
     });
   }
 
-  // Sắp xếp lại danh sách theo thứ tự và thời gian chọn
-  linkedList.value = linkedList.value.sort((a, b) => {
-    if (a.order === b.order) {
-      return a.selectedAt - b.selectedAt;
-    }
-    return a.order - b.order;
-  });
+  // Sort the linked list by order and selectedAt
+  linkedList.value = linkedList.value.sort((a, b) => a.order - b.order || a.selectedAt - b.selectedAt);
 };
 
-// Function to update the linked list
 const updateLinkedList = () => {
-  // Sắp xếp dựa trên trình tự ký
   linkedList.value = selectedEmails.value.map((email, index) => ({
     email: email,
-    order: index + 1, // Thứ tự ký
-    selectedAt: new Date().getTime(), // Thời gian được chọn để so sánh thứ tự
-  })).sort((a, b) => {
-    // Sắp xếp dựa vào thứ tự ký và thời gian chọn
-    if (a.order === b.order) {
-      return a.selectedAt - b.selectedAt; // Ai được chọn trước sẽ ở trước
-    }
-    return a.order - b.order;
-  });
+    order: index + 1,
+    selectedAt: new Date().getTime(),
+  })).sort((a, b) => a.order - b.order || a.selectedAt - b.selectedAt);
+  console.log('Selected emails:', selectedEmails.value);
 };
 
 // Function to update signature area
@@ -366,6 +340,7 @@ const saveSignatureArea = () => {
 const completeSetup = () => {
   saveSignatureArea();
   // Redirect to the next step or perform any further actions
+  handleNext();
 };
 
 // Function to update order in the linked list

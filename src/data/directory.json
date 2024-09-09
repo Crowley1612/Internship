@@ -1,0 +1,42 @@
+[
+    {
+        "directory_name": "Documents",
+        "note": "Contains important documents"
+    },
+    {
+        "directory_name": "Images",
+        "note": "Stores all image files"
+    },
+    {
+        "directory_name": "Work",
+        "note": "Files related to work projects"
+    },
+    {
+        "directory_name": "Personal",
+        "note": "Personal files and notes"
+    },
+    {
+        "directory_name": "Projects",
+        "note": "Ongoing and completed projects"
+    },
+    {
+        "directory_name": "Archive",
+        "note": "Old files and backups"
+    },
+    {
+        "directory_name": "Music",
+        "note": "All music and audio files"
+    },
+    {
+        "directory_name": "Videos",
+        "note": "Videos and movies collection"
+    },
+    {
+        "directory_name": "Downloads",
+        "note": "Files downloaded from the internet"
+    },
+    {
+        "directory_name": "Shared",
+        "note": "Shared files with others"
+    }
+]

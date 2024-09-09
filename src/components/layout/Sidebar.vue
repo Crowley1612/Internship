@@ -17,7 +17,7 @@
           <li class="nav-item">
             <router-link
               class="nav-link"
-              to="/Danh-muc"
+              to="/Quan-ly-danh-muc"
               exact-active-class="active-link"
             >
               <i class="bi bi-list"></i> Quản lý danh mục
@@ -26,7 +26,7 @@
           <li class="nav-item">
             <router-link
               class="nav-link"
-              to="/users"
+              to="/Quan-ly-danh-ba"
               exact-active-class="active-link"
             >
               <i class="bi bi-person-lines-fill"></i> Danh bạ
@@ -35,7 +35,7 @@
           <li class="nav-item">
             <router-link
               class="nav-link"
-              to="/settings"
+              to="/Cai-dat"
               exact-active-class="active-link"
             >
               <i class="bi bi-gear"></i> Cài đặt

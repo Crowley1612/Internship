@@ -176,6 +176,7 @@ export default {
   },
   created() {
     this.loadContacts();
+    this.loadSavedData();
   },
   methods: {
     openModal() {
@@ -294,11 +295,34 @@ export default {
     },
     handleNext() {
       this.showErrors = true; // Show errors if any
-      this.validateForm();
-      if (this.signers.every(signer => signer.name && signer.email)) {
+      const isValid = this.validateForm();
+      
+      if (isValid && this.signers.every(signer => signer.name && signer.email)) {
+        // Lưu thông tin người ký và người nhận vào localStorage
+        const data = {
+          signers: this.signers,
+          recipients: this.recipients,
+        };
+
+        // Chuyển đổi dữ liệu thành chuỗi JSON và lưu vào localStorage
+        localStorage.setItem('signersRecipientsData', JSON.stringify(data));
+
+        // Điều hướng đến trang tiếp theo sau khi lưu
         this.$router.push('/Thiet-lap-vung-ky');
       }
+    },
+    loadSavedData() {
+    const savedData = localStorage.getItem('signersRecipientsData');
+    
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      console.log("Signers and Recipients Data:", parsedData);
+    } else {
+      console.log("No data found in localStorage.");
     }
+  }
+
+    
   }
 };
 </script>

@@ -1,0 +1,37 @@
+[
+    {
+        "email": "dangvuong@gmail.com",
+        "customer_name": "Đặng Vũ Cường",
+        "phone_number": "92544545454",
+        "tax_code": "",
+        "organization_name": "test"
+    },
+    {
+        "email": "hangdtt.smile@gmail.com",
+        "customer_name": "Hằng",
+        "phone_number": "528248848",
+        "tax_code": "",
+        "organization_name": "abc"
+    },
+    {
+        "email": "oanh@cavn.vn",
+        "customer_name": "Bùi Thị Oanh",
+        "phone_number": "4353453",
+        "tax_code": "",
+        "organization_name": ""
+    },
+    {
+        "email": "hangdtt@cavn.vn",
+        "customer_name": "Đỗ Thị Thu Hằng",
+        "phone_number": "",
+        "tax_code": "",
+        "organization_name": ""
+    },
+    {
+        "email": "phamduongcntt60@gmail.com",
+        "customer_name": "Phạm Thanh Dương",
+        "phone_number": "",
+        "tax_code": "",
+        "organization_name": ""
+    }
+]
