@@ -15,7 +15,7 @@ import DM from "./components/phase04/directoryManagement.vue";
 import CM from "./components/phase04/contactsManagement.vue";
 import Setting from "./components/phase04/Setting.vue";
 //Setting
-import CP from "./components/setting/Password.vue";
+// import CP from "./components/setting/Password.vue";
 //Layout
 import { createRouter, createWebHistory } from "vue-router";
 import Sidebar from "./components/layout/Sidebar.vue";
@@ -48,11 +48,11 @@ const routes = [
     component: Forgotpassword,
     path: "/Quen-mat-khau",
   },
-  {
-    name: "ChangePass",
-    component: CP,
-    path: "/Doi-mat-khau",
-  },
+  // {
+  //   name: "ChangePass",
+  //   component: CP,
+  //   path: "/Doi-mat-khau",
+  // },
   //Phase02
   {
     name: "MasterPage",

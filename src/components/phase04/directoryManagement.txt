@@ -73,29 +73,13 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(item, index) in paginatedDocuments" :key="item.id">
+                            <tr v-for="(item, index) in paginatedDocuments" :key="index">
                                 <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
+                                <td>{{ item.directory_name }}</td>
+                                <td>{{ item.note }}</td>
                                 <td>
-                                    <input v-if="isEditing(item)" v-model="item.directory_name" class="form-control" />
-                                    <span v-else>{{ item.directory_name }}</span>
-                                </td>
-                                <td>
-                                    <input v-if="isEditing(item)" v-model="item.note" class="form-control" />
-                                    <span v-else>{{ item.note }}</span>
-                                </td>
-                                <td>
-                                    <a class="dropdown-item" v-if="isEditing(item)" @click="saveDocument">
-                                        <i class="bi bi-save"></i> <span class="save">Lưu</span>
-                                    </a>
-                                    <a class="dropdown-item" v-else @click="openEditModal(item)">
-                                        <i class="bi bi-pencil-square"></i> <span class="update">Sửa</span>
-                                    </a>
-                                    <a class="dropdown-item" v-if="isEditing(item)" @click="cancelEdit">
-                                        <i class="bi bi-x-circle"></i> <span class="cancel">Hủy</span>
-                                    </a>
-                                    <a class="dropdown-item text-danger" @click="deleteDocument(item)">
-                                        <i class="bi bi-trash3"></i> <span class="del">Xóa</span>
-                                    </a>
+                                    <a class="dropdown-item" @click="editDocument(item)"><i class="bi bi-pencil-square"></i> Sửa</a>
+                                    <a class="dropdown-item text-danger" @click="deleteDocument(item)"><i class="bi bi-trash3"></i> Xóa</a>
                                 </td>
                             </tr>
                         </tbody>
@@ -104,9 +88,31 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" tabindex="-1" role="dialog" v-if="currentDocument">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chỉnh sửa danh mục</h5>
+                    <button type="button" class="btn-close" @click="currentDocument = null"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" v-model="currentDocument.directory_name" class="form-control" placeholder="Tên danh mục">
+                    <textarea v-model="currentDocument.note" class="form-control" placeholder="Ghi chú"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @click="currentDocument = null">Đóng</button>
+                    <button type="button" class="btn btn-primary" @click="updateDocument">Lưu thay đổi</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
+
 <script>
+import axios from 'axios';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 
@@ -128,12 +134,11 @@ export default {
             gotoPage: 1,
             sortKey: '',
             sortOrder: 'asc',
-            editingDocument: null,
-            originalDocument: null,
+            currentDocument: null,
         };
     },
     created() {
-        this.fetchData(); // Gọi hàm lấy dữ liệu khi khởi tạo component
+        this.fetchData();
     },
     computed: {
         filteredDocuments() {
@@ -148,53 +153,31 @@ export default {
             const end = start + this.itemsPerPage;
             return this.sortedDocuments.slice(start, end);
         },
+        sortedDocuments() {
+            const sorted = [...this.filteredDocuments];
+            if (!this.sortKey) return sorted;
+
+            return sorted.sort((a, b) => {
+                let result = a[this.sortKey] > b[this.sortKey] ? 1 : -1;
+                return this.sortOrder === 'asc' ? result : -result;
+            });
+        },
         totalPages() {
             return Math.ceil(this.filteredDocuments.length / this.itemsPerPage);
-        },
-        sortedDocuments() {
-            if (!this.sortKey) return this.filteredDocuments;
-
-            return this.filteredDocuments.sort((a, b) => {
-                const comparison = a[this.sortKey] > b[this.sortKey] ? 1 : -1;
-                return this.sortOrder === 'asc' ? comparison : -comparison;
-            });
         }
     },
     methods: {
-        deleteDocument(document) {
-            if (confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
-                this.documents = this.documents.filter(item => item.id !== document.id);
-            }
-        },
-        openEditModal(item) {
-            this.originalDocument = { ...item }; // Clone document for editing
-            this.editingDocument = item;
-        },
-        saveDocument() {
-            if (this.editingDocument) {
-                // Tìm chỉ số của tài liệu cần cập nhật
-                const index = this.documents.findIndex(doc => doc.id === this.editingDocument.id);
-                if (index !== -1) {
-                    // Cập nhật tài liệu trong mảng
-                    this.documents.splice(index, 1, { ...this.editingDocument });
-                }
-                // Kết thúc chỉnh sửa
-                this.editingDocument = null;
-                this.originalDocument = null;
-            }
-        },
-        cancelEdit() {
-            if (this.originalDocument) {
-                const index = this.documents.findIndex(doc => doc.id === this.originalDocument.id);
-                if (index !== -1) {
-                    this.documents.splice(index, 1, { ...this.originalDocument });
+        async deleteDocument(document) {
+            if (confirm('Bạn có chắc chắn muốn xóa danh mục này không?')) {
+                try {
+                    await axios.delete(`/api/directory/${document.id}`); // Adjust API endpoint as needed
+                    alert('Document deleted successfully.');
+                    this.fetchData();
+                } catch (error) {
+                    console.error('Error deleting document:', error);
+                    alert('Failed to delete the document.');
                 }
             }
-            this.editingDocument = null;
-            this.originalDocument = null;
-        },
-        isEditing(document) {
-            return this.editingDocument === document;
         },
         changePage(page) {
             if (page >= 1 && page <= this.totalPages) {
@@ -204,11 +187,36 @@ export default {
         updatePageSize() {
             this.currentPage = 1;
         },
+        editDocument(item) {
+            this.currentDocument = { ...item };
+        },
+        async updateDocument() {
+            if (this.currentDocument) {
+                try {
+                    await axios.put(`/api/directory/${this.currentDocument.id}`, this.currentDocument); // Adjust API endpoint as needed
+                    alert('Document updated successfully.');
+                    this.currentDocument = null;
+                    this.fetchData();
+                } catch (error) {
+                    console.error('Error updating document:', error);
+                    alert('Failed to update the document.');
+                }
+            }
+        },
+        fetchData() {
+            axios.get('/src/data/directory.json')
+                .then(response => {
+                    this.documents = response.data;
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        },
         goToPage() {
             if (this.gotoPage >= 1 && this.gotoPage <= this.totalPages) {
                 this.changePage(this.gotoPage);
             } else {
-                alert('Số trang không hợp lệ');
+                alert('Invalid page number');
             }
         },
         filterDocuments() {
@@ -217,17 +225,6 @@ export default {
         toggleSearch(field) {
             this.searchField = this.searchField === field ? '' : field;
         },
-        setSortKey(key) {
-            this.sortOrder = this.sortKey === key && this.sortOrder === 'asc' ? 'desc' : 'asc';
-            this.sortKey = key;
-        },
-        fetchData() {
-            this.documents = [
-                { id: 1, directory_name: 'Danh mục 1', note: 'Ghi chú 1' },
-                { id: 2, directory_name: 'Danh mục 2', note: 'Ghi chú 2' },
-                // Thêm các mục khác ở đây
-            ];
-        }
     }
 };
 </script>
@@ -235,10 +232,4 @@ export default {
 
 <style scoped>
 @import '@/assets/MasterPage.css';
-.bi{
-    cursor: pointer;
-}
-.del, .update, .save,.cancel{
-    cursor: pointer;
-}
 </style>

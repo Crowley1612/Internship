@@ -1,44 +1,64 @@
 <template>
     <div class="container-fluid h-100">
         <div class="row h-100">
-            <!-- Sidebar -->
             <Sidebar />
-
-            <!-- Main content area -->
             <div class="col-md-10 p-4">
-                <!-- Header -->
                 <Header />
-
-                <!-- Title -->
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h1>Cài đặt</h1>
                 </div>
-
-                <!-- Tabs and Content -->
                 <div class="card shadow-sm p-4">
                     <a-tabs>
                         <a-tab-pane key="1" tab="Cài đặt tài khoản">
                             <div class="profile-info-container">
                                 <div class="profile-header">
-                                    <div class="profile-picture">
-                                        <span>👤</span>
+                                    <div class="profile-picture"><span>👤</span></div>
+                                    <div class="profile-name">{{ user.name }}</div>
+                                    <div class="verification">
+                                        <i class="bi bi-check-lg"></i> Đã xác minh
                                     </div>
-                                    <div class="profile-name">Đỗ Thị Thu Hằng 1</div>
-                                    <div class="verification"><i class="bi bi-check-lg"></i>Đã xác minh</div>
                                 </div>
 
                                 <div class="info-section">
                                     <div class="header">
                                         <h2>Thông tin cơ bản</h2>
-                                        <a href="#" class="edit-button"><i class="bi bi-pencil-square"></i> Thay đổi
-                                            thông tin</a>
+                                        <a-button type="primary" @click="showModal">
+                                            <i class="bi bi-pencil-square"></i> Thay đổi thông tin
+                                        </a-button>
+                                        <a-modal v-model:open="isModalOpen" title="Chỉnh sửa thông tin cá nhân"
+                                            @ok="handleOk">
+                                            <template #footer>
+                                                <a-button key="back" @click="handleCancelModal">Quay lại</a-button>
+                                                <a-button key="submit" type="primary" :loading="loading"
+                                                    @click="handleOk">
+                                                    Xác nhận
+                                                </a-button>
+                                            </template>
+                                            <a-form :model="editUser">
+                                                <a-form-item label="Họ và tên">
+                                                    <a-input v-model="editUser.name" />
+                                                </a-form-item>
+                                                <a-form-item label="Mã số thuế">
+                                                    <a-input v-model="editUser.taxcode" />
+                                                </a-form-item>
+                                                <a-form-item label="Công ty">
+                                                    <a-input v-model="editUser.company" />
+                                                </a-form-item>
+                                                <a-form-item label="Số điện thoại">
+                                                    <a-input v-model="editUser.phone" />
+                                                </a-form-item>
+                                                <a-form-item label="Tên tài khoản">
+                                                    <a-input v-model="editUser.username" />
+                                                </a-form-item>
+                                            </a-form>
+                                        </a-modal>
                                     </div>
                                     <div class="info">
-                                        <div><strong>Họ và tên:</strong> Đỗ Thị Thu Hằng 1</div>
+                                        <div><strong>Họ và tên:</strong> {{ user.name }}</div>
                                     </div>
                                     <div class="info">
-                                        <div><strong>Mã số thuế:</strong> 0103930279</div>
-                                        <div><strong>Công ty:</strong> Nacenncomm SCT</div>
+                                        <div><strong>Mã số thuế:</strong> {{ user.taxcode }}</div>
+                                        <div><strong>Công ty:</strong> {{ user.company }}</div>
                                     </div>
                                 </div>
 
@@ -47,12 +67,13 @@
                                         <h2>Thông tin tài khoản</h2>
                                     </div>
                                     <div class="info">
-                                        <div><strong>Tên tài khoản:</strong> hangdtt@cavvn.vn</div>
-                                        <div class="email"><strong>Email:</strong> hangdtt@cavvn.vn <span>✔️</span>
+                                        <div><strong>Tên tài khoản:</strong> {{ user.email }}</div>
+                                        <div class="email">
+                                            <strong>Email:</strong> {{ user.email }} <span>✔️</span>
                                         </div>
                                     </div>
                                     <div class="info">
-                                        <div><strong>Số điện thoại:</strong> 0902432283</div>
+                                        <div><strong>Số điện thoại:</strong> {{ user.phone }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -66,27 +87,28 @@
                                 <div class="info">
                                     <div>
                                         <label>Email:</label>
-                                        <input type="text" value="hangdtt@cavvn.vn" readonly>
+                                        <input type="text" v-model="user.email" readonly />
                                     </div>
                                     <div>
                                         <label>Mã đăng ký:</label>
-                                        <input type="text" value="400196" readonly>
+                                        <input type="text" v-model="settings.registrationCode" readonly />
                                     </div>
                                 </div>
                                 <div class="info">
                                     <div>
                                         <label>Ngày hết hạn CTS:</label>
-                                        <input type="text" value="08-07-2025 09:37:46" readonly>
+                                        <input type="text" value="08-07-2025 09:37:46" readonly />
                                     </div>
                                     <div>
                                         <label>Serial number:</label>
-                                        <input type="text" value="5402BC5ACCE669C202300000007A3" readonly>
+                                        <input type="text" value="5402BC5ACCE669C202300000007A3" readonly />
                                     </div>
                                 </div>
                                 <div class="long-info">
                                     <label>Thông tin chứng thư số:</label>
                                     <textarea readonly>
-C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội, 0.9.2342.19200300.100.1=CCCCD:001191009538, O=Đỗ Thị Thu Hằng, E=hangdtt@cavvn.vn, CN=Đỗ Thị Thu Hằng
+                C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
+                0.9.2342.19200300.100.1=CCCCD:001191009538, O=Đỗ Thị Thu Hằng, E={{ user.email }}, CN=Đỗ Thị Thu Hằng
             </textarea>
                                 </div>
                             </div>
@@ -96,59 +118,61 @@ C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội, 0
                                     <label>Chọn phương thức ký:</label>
                                     <div class="radio-group">
                                         <label>
-                                            <input type="radio" name="signingMethod" value="usb" checked>
+                                            <input type="radio" name="signingMethod" value="usb"
+                                                v-model="settings.signingMethod" />
                                             Ký bằng USB Token
                                         </label>
                                         <label>
-                                            <input type="radio" name="signingMethod" value="remote">
+                                            <input type="radio" name="signingMethod" value="remote"
+                                                v-model="settings.signingMethod" />
                                             Ký bằng Remote Signing
                                         </label>
                                     </div>
                                     <label>Mã đăng ký:</label>
-                                    <input type="text" value="400196" readonly>
-                                    <button class="update-button">Cập nhật</button>
+                                    <input type="text" v-model="settings.registrationCode" />
+                                    <button class="update-button" @click="updateRegistrationCode">Cập nhật</button>
                                 </div>
                                 <div class="section">
                                     <h2>Cài đặt hiển thị</h2>
                                     <div class="radio-group">
                                         <label>
-                                            <input type="radio" name="displayMethod" value="displaySignature" checked>
+                                            <input type="radio" name="displayMethod" value="displaySignature"
+                                                v-model="settings.displayMethod" />
                                             Hiển thị chữ ký số
                                         </label>
                                         <label>
-                                            <input type="radio" name="displayMethod" value="displayImage">
+                                            <input type="radio" name="displayMethod" value="displayImage"
+                                                v-model="settings.displayMethod" />
                                             Hiển thị ảnh
                                         </label>
                                         <label>
-                                            <input type="radio" name="displayMethod" value="displayBoth">
+                                            <input type="radio" name="displayMethod" value="displayBoth"
+                                                v-model="settings.displayMethod" />
                                             Hiển thị ảnh và chữ ký số
                                         </label>
                                     </div>
                                 </div>
                             </div>
                         </a-tab-pane>
+
                         <a-tab-pane key="3" tab="Đổi mật khẩu">
                             <div class="change-password-container">
                                 <h2>Thay đổi mật khẩu</h2>
-                                <p>Mật khẩu yêu cầu có tối thiểu 6 ký tự bao gồm số, chữ cái thường, chữ cái in hoa, ký
-                                    tự đặc biệt.</p>
-
+                                <p>Mật khẩu cần có tối thiểu 6 ký tự, bao gồm số, chữ cái thường, chữ in hoa, ký tự đặc
+                                    biệt.</p>
                                 <a-form :model="passwordForm" :rules="rules" layout="vertical" @submit="handleSubmit">
                                     <a-form-item label="Mật khẩu cũ" name="oldPassword" required>
                                         <a-input-password v-model="passwordForm.oldPassword"
-                                            placeholder="Nhập mật khẩu cũ" />
+                                            placeholder="Nhập mật khẩu cũ" @input="clearFeedback" />
                                     </a-form-item>
-
                                     <a-form-item label="Mật khẩu mới" name="newPassword" required>
                                         <a-input-password v-model="passwordForm.newPassword"
-                                            placeholder="Nhập mật khẩu mới" />
+                                            placeholder="Nhập mật khẩu mới" @input="clearFeedback" />
                                     </a-form-item>
-
                                     <a-form-item label="Xác nhận mật khẩu mới" name="confirmPassword" required>
                                         <a-input-password v-model="passwordForm.confirmPassword"
-                                            placeholder="Nhập lại mật khẩu mới" />
+                                            placeholder="Xác nhận mật khẩu mới" @input="clearFeedback" />
                                     </a-form-item>
-
                                     <a-form-item>
                                         <a-button class="cancel-button" @click="handleCancel">Hủy</a-button>
                                         <a-button type="primary" html-type="submit" :loading="loading">Xác
@@ -170,42 +194,83 @@ import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 
 export default {
-    components: {
-        Sidebar,
-        Header,
-    },
+    components: { Sidebar, Header },
     data() {
         return {
+            settings: {
+                signingMethod: 'usb',
+                registrationCode: '400196',
+                displayMethod: 'displaySignature'
+            },
+            user: {
+                email: 'user@example.com',
+                username: 'user@example.com',
+                name: 'Nguyen Van A',
+                phone: '0123456789',
+                address: '123 Đường ABC, Quận 1, TP.HCM',
+                taxcode: '1234567890',
+                company: 'Công ty TNHH ABC',
+            },
             passwordForm: {
                 oldPassword: '',
                 newPassword: '',
                 confirmPassword: '',
             },
             rules: {
-                oldPassword: [{ required: true, message: 'Vui lòng nhập mật khẩu cũ' }],
-                newPassword: [{ required: true, message: 'Vui lòng nhập mật khẩu mới' }],
-                confirmPassword: [
-                    { required: true, message: 'Vui lòng nhập lại mật khẩu mới' },
-                    { validator: this.validatePasswordConfirmation },
+                oldPassword: [{ required: true, message: 'Mật khẩu cũ không được để trống' }],
+                newPassword: [
+                    { required: true, message: 'Mật khẩu mới không được để trống' },
+                    { min: 6, message: 'Mật khẩu mới phải có tối thiểu 6 ký tự' }
                 ],
+                confirmPassword: [
+                    { required: true, message: 'Xác nhận mật khẩu mới không được để trống' },
+                    {
+                        validator: (rule, value) => {
+                            return new Promise((resolve, reject) => {
+                                if (value !== this.passwordForm.newPassword) {
+                                    reject('Mật khẩu xác nhận không khớp');
+                                } else {
+                                    resolve();
+                                }
+                            });
+                        }
+                    }
+                ]
             },
             loading: false,
             feedbackMessage: '',
+            isModalOpen: false,
+            editUser: { ...this.user }, // Initialize editUser
         };
     },
     methods: {
-        async handleSubmit() {
-            this.loading = true;
+        updateRegistrationCode() {
+            // Logic to update the registration code
+            alert('Mã đăng ký đã được cập nhật: ' + this.settings.registrationCode);
+        },
+        handleSubmit(e) {
+            e.preventDefault();
             this.feedbackMessage = '';
-            try {
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                this.feedbackMessage = 'Mật khẩu đã được thay đổi thành công.';
-            } catch (error) {
-                this.feedbackMessage = 'Có lỗi xảy ra. Vui lòng thử lại.';
-            } finally {
-                this.loading = false;
+
+            if (!this.passwordForm.oldPassword || !this.passwordForm.newPassword || !this.passwordForm.confirmPassword) {
+                this.feedbackMessage = 'Không được để trống thông tin';
+                return;
             }
+
+            if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
+                this.feedbackMessage = 'Mật khẩu mới và xác nhận mật khẩu không khớp';
+                return;
+            }
+
+            this.loading = true;
+            setTimeout(() => {
+                // Simulate an API call
+                this.loading = false;
+                this.feedbackMessage = 'Mật khẩu đã được thay đổi thành công';
+                this.passwordForm.oldPassword = '';
+                this.passwordForm.newPassword = '';
+                this.passwordForm.confirmPassword = '';
+            }, 1000);
         },
         handleCancel() {
             this.passwordForm.oldPassword = '';
@@ -213,15 +278,34 @@ export default {
             this.passwordForm.confirmPassword = '';
             this.feedbackMessage = '';
         },
-        validatePasswordConfirmation(rule, value) {
-            if (value !== this.passwordForm.newPassword) {
-                return Promise.reject('Mật khẩu xác nhận không khớp');
+        clearFeedback() {
+            this.feedbackMessage = '';
+        },
+        showModal() {
+            this.editUser = { ...this.user };
+            this.isModalOpen = true;
+        },
+        async handleOk() {
+            this.loading = true;
+            this.feedbackMessage = '';
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate an API call
+                this.user = { ...this.editUser }; // Update user data
+                this.feedbackMessage = 'Thông tin đã được cập nhật thành công.';
+                this.isModalOpen = false;
+            } catch (error) {
+                this.feedbackMessage = 'Có lỗi xảy ra. Vui lòng thử lại.';
+            } finally {
+                this.loading = false;
             }
-            return Promise.resolve();
+        },
+        handleCancelModal() {
+            this.isModalOpen = false;
         },
     },
 };
 </script>
+
 <style scoped>
 @import '@/assets/MasterPage.css';
 @import '@/assets/Setting.css';
