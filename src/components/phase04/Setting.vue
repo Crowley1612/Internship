@@ -25,33 +25,6 @@
                                         <a-button type="primary" @click="showModal">
                                             <i class="bi bi-pencil-square"></i> Thay đổi thông tin
                                         </a-button>
-                                        <a-modal v-model:open="isModalOpen" title="Chỉnh sửa thông tin cá nhân"
-                                            @ok="handleOk">
-                                            <template #footer>
-                                                <a-button key="back" @click="handleCancelModal">Quay lại</a-button>
-                                                <a-button key="submit" type="primary" :loading="loading"
-                                                    @click="handleOk">
-                                                    Xác nhận
-                                                </a-button>
-                                            </template>
-                                            <a-form :model="editUser">
-                                                <a-form-item label="Họ và tên">
-                                                    <a-input v-model="editUser.name" />
-                                                </a-form-item>
-                                                <a-form-item label="Mã số thuế">
-                                                    <a-input v-model="editUser.taxcode" />
-                                                </a-form-item>
-                                                <a-form-item label="Công ty">
-                                                    <a-input v-model="editUser.company" />
-                                                </a-form-item>
-                                                <a-form-item label="Số điện thoại">
-                                                    <a-input v-model="editUser.phone" />
-                                                </a-form-item>
-                                                <a-form-item label="Tên tài khoản">
-                                                    <a-input v-model="editUser.username" />
-                                                </a-form-item>
-                                            </a-form>
-                                        </a-modal>
                                     </div>
                                     <div class="info">
                                         <div><strong>Họ và tên:</strong> {{ user.name }}</div>
@@ -87,29 +60,29 @@
                                 <div class="info">
                                     <div>
                                         <label>Email:</label>
-                                        <input type="text" v-model="user.email" readonly />
+                                        <span>{{ user.email }}</span>
                                     </div>
                                     <div>
                                         <label>Mã đăng ký:</label>
-                                        <input type="text" v-model="settings.registrationCode" readonly />
+                                        <span>{{ settings.registrationCode }}</span>
                                     </div>
                                 </div>
                                 <div class="info">
                                     <div>
                                         <label>Ngày hết hạn CTS:</label>
-                                        <input type="text" value="08-07-2025 09:37:46" readonly />
+                                        <span>08-07-2025 09:37:46</span>
                                     </div>
                                     <div>
                                         <label>Serial number:</label>
-                                        <input type="text" value="5402BC5ACCE669C202300000007A3" readonly />
+                                        <span>5402BC5ACCE669C202300000007A3</span>
                                     </div>
                                 </div>
                                 <div class="long-info">
                                     <label>Thông tin chứng thư số:</label>
                                     <textarea readonly>
-                C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
-                0.9.2342.19200300.100.1=CCCCD:001191009538, O=Đỗ Thị Thu Hằng, E={{ user.email }}, CN=Đỗ Thị Thu Hằng
-            </textarea>
+C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
+0.9.2342.19200300.100.1=CCCCD:001191009538, O=Đỗ Thị Thu Hằng, E={{ user.email }}, CN=Đỗ Thị Thu Hằng
+                                    </textarea>
                                 </div>
                             </div>
                             <div class="container">
@@ -158,9 +131,8 @@
                         <a-tab-pane key="3" tab="Đổi mật khẩu">
                             <div class="change-password-container">
                                 <h2>Thay đổi mật khẩu</h2>
-                                <p>Mật khẩu cần có tối thiểu 6 ký tự, bao gồm số, chữ cái thường, chữ in hoa, ký tự đặc
-                                    biệt.</p>
-                                <a-form :model="passwordForm" :rules="rules" layout="vertical" @submit="handleSubmit">
+                                <p>Mật khẩu cần có tối thiểu 6 ký tự, bao gồm số, chữ cái thường, chữ in hoa, ký tự đặc biệt.</p>
+                                <a-form :model="passwordForm" :rules="rules" layout="vertical" @submit.prevent="handleSubmit">
                                     <a-form-item label="Mật khẩu cũ" name="oldPassword" required>
                                         <a-input-password v-model="passwordForm.oldPassword"
                                             placeholder="Nhập mật khẩu cũ" @input="clearFeedback" />
@@ -175,8 +147,7 @@
                                     </a-form-item>
                                     <a-form-item>
                                         <a-button class="cancel-button" @click="handleCancel">Hủy</a-button>
-                                        <a-button type="primary" html-type="submit" :loading="loading">Xác
-                                            nhận</a-button>
+                                        <a-button type="primary" html-type="submit" :loading="loading">Xác nhận</a-button>
                                     </a-form-item>
                                 </a-form>
                                 <div v-if="feedbackMessage" class="feedback-message">{{ feedbackMessage }}</div>
@@ -186,6 +157,25 @@
                 </div>
             </div>
         </div>
+        <a-modal title="Thay đổi thông tin" v-model:open="isModalOpen" @ok="handleOk" @cancel="handleCancelModal">
+            <a-form layout="vertical">
+                <a-form-item label="Họ và tên">
+                    <a-input v-model="editUser.name" />
+                </a-form-item>
+                <a-form-item label="Mã số thuế">
+                    <a-input v-model="editUser.taxcode" />
+                </a-form-item>
+                <a-form-item label="Công ty">
+                    <a-input v-model="editUser.company" />
+                </a-form-item>
+                <a-form-item label="Tên tài khoản">
+                    <a-input v-model="editUser.username" />
+                </a-form-item>
+                <a-form-item label="Số điện thoại">
+                    <a-input v-model="editUser.phone" />
+                </a-form-item>
+            </a-form>
+        </a-modal>
     </div>
 </template>
 
@@ -207,7 +197,6 @@ export default {
                 username: 'user@example.com',
                 name: 'Nguyen Van A',
                 phone: '0123456789',
-                address: '123 Đường ABC, Quận 1, TP.HCM',
                 taxcode: '1234567890',
                 company: 'Công ty TNHH ABC',
             },
@@ -248,8 +237,7 @@ export default {
             // Logic to update the registration code
             alert('Mã đăng ký đã được cập nhật: ' + this.settings.registrationCode);
         },
-        handleSubmit(e) {
-            e.preventDefault();
+        handleSubmit() {
             this.feedbackMessage = '';
 
             if (!this.passwordForm.oldPassword || !this.passwordForm.newPassword || !this.passwordForm.confirmPassword) {
@@ -286,15 +274,15 @@ export default {
             this.isModalOpen = true;
         },
         async handleOk() {
+            console.log(this.editUser); // Check if the updated values are correct
             this.loading = true;
-            this.feedbackMessage = '';
             try {
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate an API call
-                this.user = { ...this.editUser }; // Update user data
-                this.feedbackMessage = 'Thông tin đã được cập nhật thành công.';
+                // Simulate API call
+                this.user = { ...this.editUser };
+                console.log('Updated user:', this.user);
                 this.isModalOpen = false;
             } catch (error) {
-                this.feedbackMessage = 'Có lỗi xảy ra. Vui lòng thử lại.';
+                console.error(error);
             } finally {
                 this.loading = false;
             }
@@ -309,4 +297,8 @@ export default {
 <style scoped>
 @import '@/assets/MasterPage.css';
 @import '@/assets/Setting.css';
+.feedback-message {
+    color: red;
+    margin-top: 10px;
+}
 </style>
