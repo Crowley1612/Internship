@@ -40,7 +40,7 @@
                                         <h2>Thông tin tài khoản</h2>
                                     </div>
                                     <div class="info">
-                                        <div><strong>Tên tài khoản:</strong> {{ user.email }}</div>
+                                        <div><strong>Tên tài khoản:</strong> {{ user.username }}</div>
                                         <div class="email">
                                             <strong>Email:</strong> {{ user.email }} <span>✔️</span>
                                         </div>
@@ -131,8 +131,10 @@ C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
                         <a-tab-pane key="3" tab="Đổi mật khẩu">
                             <div class="change-password-container">
                                 <h2>Thay đổi mật khẩu</h2>
-                                <p>Mật khẩu cần có tối thiểu 6 ký tự, bao gồm số, chữ cái thường, chữ in hoa, ký tự đặc biệt.</p>
-                                <a-form :model="passwordForm" :rules="rules" layout="vertical" @submit.prevent="handleSubmit">
+                                <p>Mật khẩu cần có tối thiểu 6 ký tự, bao gồm số, chữ cái thường, chữ in hoa, ký tự đặc
+                                    biệt.</p>
+                                <a-form :model="passwordForm" :rules="rules" layout="vertical"
+                                    @submit.prevent="handleSubmit">
                                     <a-form-item label="Mật khẩu cũ" name="oldPassword" required>
                                         <a-input-password v-model="passwordForm.oldPassword"
                                             placeholder="Nhập mật khẩu cũ" @input="clearFeedback" />
@@ -147,7 +149,8 @@ C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
                                     </a-form-item>
                                     <a-form-item>
                                         <a-button class="cancel-button" @click="handleCancel">Hủy</a-button>
-                                        <a-button type="primary" html-type="submit" :loading="loading">Xác nhận</a-button>
+                                        <a-button type="primary" html-type="submit" :loading="loading">Xác
+                                            nhận</a-button>
                                     </a-form-item>
                                 </a-form>
                                 <div v-if="feedbackMessage" class="feedback-message">{{ feedbackMessage }}</div>
@@ -160,19 +163,34 @@ C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
         <a-modal title="Thay đổi thông tin" v-model:open="isModalOpen" @ok="handleOk" @cancel="handleCancelModal">
             <a-form layout="vertical">
                 <a-form-item label="Họ và tên">
-                    <a-input v-model="editUser.name" />
+                    <a-input v-model="editUser.name" @change="(e) => {
+                        editUser.name = e.target.value;
+                    }
+                        " />
                 </a-form-item>
                 <a-form-item label="Mã số thuế">
-                    <a-input v-model="editUser.taxcode" />
+                    <a-input v-model="editUser.taxcode" @change="(e) => {
+                        editUser.taxcode = e.target.value;
+                    }
+                        " />
                 </a-form-item>
                 <a-form-item label="Công ty">
-                    <a-input v-model="editUser.company" />
+                    <a-input v-model="editUser.company" @change="(e) => {
+                        editUser.company = e.target.value;
+                    }
+                        " />
                 </a-form-item>
                 <a-form-item label="Tên tài khoản">
-                    <a-input v-model="editUser.username" />
+                    <a-input v-model="editUser.username" @change="(e) => {
+                        editUser.username = e.target.value;
+                    }
+                        " />
                 </a-form-item>
                 <a-form-item label="Số điện thoại">
-                    <a-input v-model="editUser.phone" />
+                    <a-input v-model="editUser.phone" @change="(e) => {
+                        editUser.phone = e.target.value;
+                    }
+                        " />
                 </a-form-item>
             </a-form>
         </a-modal>
@@ -297,6 +315,7 @@ export default {
 <style scoped>
 @import '@/assets/MasterPage.css';
 @import '@/assets/Setting.css';
+
 .feedback-message {
     color: red;
     margin-top: 10px;
