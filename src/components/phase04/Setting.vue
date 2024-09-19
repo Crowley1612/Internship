@@ -9,6 +9,7 @@
                 </div>
                 <div class="card shadow-sm p-4">
                     <a-tabs>
+                        <!-- Account setting -->
                         <a-tab-pane key="1" tab="Cài đặt tài khoản">
                             <div class="profile-info-container">
                                 <div class="profile-header">
@@ -51,7 +52,7 @@
                                 </div>
                             </div>
                         </a-tab-pane>
-
+                        <!-- Phương thức ký -->
                         <a-tab-pane key="2" tab="Phương thức ký">
                             <div class="container">
                                 <div class="header">
@@ -127,33 +128,45 @@ C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
                                 </div>
                             </div>
                         </a-tab-pane>
-
+                        <!-- Đổi mật khẩu -->
                         <a-tab-pane key="3" tab="Đổi mật khẩu">
                             <div class="change-password-container">
                                 <h2>Thay đổi mật khẩu</h2>
                                 <p>Mật khẩu cần có tối thiểu 6 ký tự, bao gồm số, chữ cái thường, chữ in hoa, ký tự đặc
                                     biệt.</p>
-                                <a-form :model="passwordForm" :rules="rules" layout="vertical"
-                                    @submit.prevent="handleSubmit">
-                                    <a-form-item label="Mật khẩu cũ" name="oldPassword" required>
-                                        <a-input-password v-model="passwordForm.oldPassword"
-                                            placeholder="Nhập mật khẩu cũ" @input="clearFeedback" />
-                                    </a-form-item>
-                                    <a-form-item label="Mật khẩu mới" name="newPassword" required>
-                                        <a-input-password v-model="passwordForm.newPassword"
-                                            placeholder="Nhập mật khẩu mới" @input="clearFeedback" />
-                                    </a-form-item>
-                                    <a-form-item label="Xác nhận mật khẩu mới" name="confirmPassword" required>
-                                        <a-input-password v-model="passwordForm.confirmPassword"
-                                            placeholder="Xác nhận mật khẩu mới" @input="clearFeedback" />
-                                    </a-form-item>
-                                    <a-form-item>
-                                        <a-button class="cancel-button" @click="handleCancel">Hủy</a-button>
-                                        <a-button type="primary" html-type="submit" :loading="loading">Xác
-                                            nhận</a-button>
-                                    </a-form-item>
-                                </a-form>
-                                <div v-if="feedbackMessage" class="feedback-message">{{ feedbackMessage }}</div>
+                                <div class="form-change-pass">
+                                    <a-form ref="formRef" name="custom-validation" :model="formState" :rules="rules"
+                                        v-bind="layout" @finish="handleFinish" @validate="handleValidate"
+                                        @finishFailed="handleFinishFailed">
+                                        <!-- Old Password Field -->
+                                        <label style="margin-right: 20px;">Nhập mật khẩu cũ:</label>
+                                        <a-form-item has-feedback name="oldPass" style="margin-right: 20px;">
+                                            <a-input v-model:value="formState.oldPass"
+                                                type="password" autocomplete="off" />
+                                        </a-form-item>
+
+                                        <!-- Password Field -->
+                                        <label style="margin-right: 20px;">Mật khẩu mới:</label>
+                                        <a-form-item has-feedback name="pass">
+                                            <a-input v-model:value="formState.pass"
+                                                type="password" autocomplete="off" />
+                                        </a-form-item>
+
+                                        <!-- Confirm Password Field -->
+                                        <label style="margin-right: 20px;">Xác nhận mật khẩu:</label>
+                                        <a-form-item has-feedback name="checkPass">
+                                            <a-input v-model:value="formState.checkPass"
+                                                type="password" autocomplete="off" />
+                                        </a-form-item>
+
+                                        <!-- Submit and Reset Button -->
+                                        <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+                                            <a-button style="margin-left: 0px;" @click="resetForm">Huỷ</a-button>
+                                            <a-button style="margin-left: 10px;" type="primary" html-type="submit">Xác
+                                                nhận</a-button>
+                                        </a-form-item>
+                                    </a-form>
+                                </div>
                             </div>
                         </a-tab-pane>
                     </a-tabs>
@@ -162,31 +175,31 @@ C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
         </div>
         <a-modal title="Thay đổi thông tin" v-model:open="isModalOpen" @ok="handleOk" @cancel="handleCancelModal">
             <a-form layout="vertical">
-                <a-form-item label="Họ và tên">
+                <a-form-item label="Họ và tên:">
                     <a-input v-model="editUser.name" @change="(e) => {
                         editUser.name = e.target.value;
                     }
                         " />
                 </a-form-item>
-                <a-form-item label="Mã số thuế">
+                <a-form-item label="Mã số thuế:">
                     <a-input v-model="editUser.taxcode" @change="(e) => {
                         editUser.taxcode = e.target.value;
                     }
                         " />
                 </a-form-item>
-                <a-form-item label="Công ty">
+                <a-form-item label="Công ty:">
                     <a-input v-model="editUser.company" @change="(e) => {
                         editUser.company = e.target.value;
                     }
                         " />
                 </a-form-item>
-                <a-form-item label="Tên tài khoản">
+                <a-form-item label="Tên tài khoản:">
                     <a-input v-model="editUser.username" @change="(e) => {
                         editUser.username = e.target.value;
                     }
                         " />
                 </a-form-item>
-                <a-form-item label="Số điện thoại">
+                <a-form-item label="Số điện thoại:">
                     <a-input v-model="editUser.phone" @change="(e) => {
                         editUser.phone = e.target.value;
                     }
@@ -197,123 +210,139 @@ C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
     </div>
 </template>
 
-<script>
+<script setup>
+import { reactive, ref } from 'vue';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 
-export default {
-    components: { Sidebar, Header },
-    data() {
-        return {
-            settings: {
-                signingMethod: 'usb',
-                registrationCode: '400196',
-                displayMethod: 'displaySignature'
-            },
-            user: {
-                email: 'user@example.com',
-                username: 'user@example.com',
-                name: 'Nguyen Van A',
-                phone: '0123456789',
-                taxcode: '1234567890',
-                company: 'Công ty TNHH ABC',
-            },
-            passwordForm: {
-                oldPassword: '',
-                newPassword: '',
-                confirmPassword: '',
-            },
-            rules: {
-                oldPassword: [{ required: true, message: 'Mật khẩu cũ không được để trống' }],
-                newPassword: [
-                    { required: true, message: 'Mật khẩu mới không được để trống' },
-                    { min: 6, message: 'Mật khẩu mới phải có tối thiểu 6 ký tự' }
-                ],
-                confirmPassword: [
-                    { required: true, message: 'Xác nhận mật khẩu mới không được để trống' },
-                    {
-                        validator: (rule, value) => {
-                            return new Promise((resolve, reject) => {
-                                if (value !== this.passwordForm.newPassword) {
-                                    reject('Mật khẩu xác nhận không khớp');
-                                } else {
-                                    resolve();
-                                }
-                            });
-                        }
-                    }
-                ]
-            },
-            loading: false,
-            feedbackMessage: '',
-            isModalOpen: false,
-            editUser: { ...this.user }, // Initialize editUser
-        };
-    },
-    methods: {
-        updateRegistrationCode() {
-            // Logic to update the registration code
-            alert('Mã đăng ký đã được cập nhật: ' + this.settings.registrationCode);
-        },
-        handleSubmit() {
-            this.feedbackMessage = '';
+// Reactive states for settings and user
+const settings = reactive({
+    signingMethod: 'usb',
+    registrationCode: '400196',
+    displayMethod: 'displaySignature'
+});
 
-            if (!this.passwordForm.oldPassword || !this.passwordForm.newPassword || !this.passwordForm.confirmPassword) {
-                this.feedbackMessage = 'Không được để trống thông tin';
-                return;
-            }
+const user = reactive({
+    email: 'user@example.com',
+    username: 'user@example.com',
+    name: 'Nguyen Van A',
+    phone: '0123456789',
+    taxcode: '1234567890',
+    company: 'Công ty TNHH ABC'
+});
 
-            if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
-                this.feedbackMessage = 'Mật khẩu mới và xác nhận mật khẩu không khớp';
-                return;
-            }
+const formState = reactive({
+    oldPass: '',
+    pass: '',
+    checkPass: ''
+});
 
-            this.loading = true;
-            setTimeout(() => {
-                // Simulate an API call
-                this.loading = false;
-                this.feedbackMessage = 'Mật khẩu đã được thay đổi thành công';
-                this.passwordForm.oldPassword = '';
-                this.passwordForm.newPassword = '';
-                this.passwordForm.confirmPassword = '';
-            }, 1000);
-        },
-        handleCancel() {
-            this.passwordForm.oldPassword = '';
-            this.passwordForm.newPassword = '';
-            this.passwordForm.confirmPassword = '';
-            this.feedbackMessage = '';
-        },
-        clearFeedback() {
-            this.feedbackMessage = '';
-        },
-        showModal() {
-            this.editUser = { ...this.user };
-            this.isModalOpen = true;
-        },
-        async handleOk() {
-            console.log(this.editUser); // Check if the updated values are correct
-            this.loading = true;
-            try {
-                // Simulate API call
-                this.user = { ...this.editUser };
-                console.log('Updated user:', this.user);
-                this.isModalOpen = false;
-            } catch (error) {
-                console.error(error);
-            } finally {
-                this.loading = false;
-            }
-        },
-        handleCancelModal() {
-            this.isModalOpen = false;
-        },
-    },
+// Define ref for the form
+const formRef = ref(null);
+
+// Custom validation for Old Password
+const validateOldPass = async (_rule, value) => {
+    if (!value) return Promise.reject('Please input the old password');
+    return Promise.resolve();
 };
+
+// Custom validation for Password complexity
+const validatePasswordComplexity = (_rule, value) => {
+    const minLength = 6;
+    const hasNumber = /[0-9]/;
+    const hasLowercase = /[a-z]/;
+    const hasUppercase = /[A-Z]/;
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
+
+    if (!value) return Promise.reject('Please input the password');
+    if (value.length < minLength) return Promise.reject(`Password must be at least ${minLength} characters long`);
+    if (!hasNumber.test(value)) return Promise.reject('Password must contain at least one number');
+    if (!hasLowercase.test(value)) return Promise.reject('Password must contain at least one lowercase letter');
+    if (!hasUppercase.test(value)) return Promise.reject('Password must contain at least one uppercase letter');
+    if (!hasSpecialChar.test(value)) return Promise.reject('Password must contain at least one special character');
+
+    return Promise.resolve();
+};
+
+// Custom validation for Confirm Password field
+const validateConfirmPassword = async (_rule, value) => {
+    if (!value) return Promise.reject('Please input the password again');
+    if (value !== formState.pass) return Promise.reject("Passwords don't match");
+    return Promise.resolve();
+};
+
+// Form validation rules
+const rules = {
+    oldPass: [{ required: true, validator: validateOldPass, trigger: 'change' }],
+    pass: [
+        { required: true, validator: validatePasswordComplexity, trigger: 'change' }
+    ],
+    checkPass: [{ validator: validateConfirmPassword, trigger: 'change' }],
+};
+
+// Form layout configuration
+const layout = {
+    labelCol: { span: 4 },
+    wrapperCol: { span: 14 }
+};
+
+// Form submission handling
+const handleFinish = values => {
+    console.log('Form submitted successfully:', values);
+};
+
+const handleFinishFailed = errors => {
+    console.log('Form submission failed:', errors);
+};
+
+// Reset form fields
+const resetForm = () => {
+    if (formRef.value) {
+        formRef.value.resetFields();
+    }
+};
+
+// Log form validation events
+const handleValidate = (...args) => {
+    console.log('Validation triggered:', args);
+};
+
+const loading = ref(false);
+const isModalOpen = ref(false);
+const editUser = reactive({ ...user });
+
+function updateRegistrationCode() {
+    alert('Mã đăng ký đã được cập nhật: ' + settings.registrationCode);
+}
+
+function showModal() {
+    Object.assign(editUser, user);
+    isModalOpen.value = true;
+}
+
+async function handleOk() {
+    console.log(editUser); // Check if the updated values are correct
+    loading.value = true;
+    try {
+        // Simulate API call
+        Object.assign(user, editUser);
+        console.log('Updated user:', user);
+        isModalOpen.value = false;
+    } catch (error) {
+        console.error(error);
+    } finally {
+        loading.value = false;
+    }
+}
+
+function handleCancelModal() {
+    isModalOpen.value = false;
+}
 </script>
 
+
 <style scoped>
-@import '@/assets/MasterPage.css';
+
 @import '@/assets/Setting.css';
 
 .feedback-message {

@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <NavBar />
     <div class="main-content">
       <div class="content">
         <h4 class="title">Các tệp PDF đã tải lên:</h4>
@@ -19,45 +20,49 @@
           <canvas v-for="page in pages" :key="page.num" class="pdf-canvas"></canvas>
           <div v-for="(area, index) in signatureAreas" :key="index"
             :style="{ top: area.y + 'px', left: area.x + 'px', width: area.width + 'px', height: area.height + 'px' }"
-            class="signature-area" @mouseenter="hoveredArea = area" @mouseleave="hoveredArea = null">
+            class="signature-area"
+            @mouseenter="hoveredArea = area"
+            @mouseleave="hoveredArea = null">
             <span>Signature Area for {{ area.email }}</span>
             <div v-if="hoveredArea === area" class="drawing-buttons">
               <button @click="deleteSignatureArea(area)" class="btn btn-danger">Xóa</button>
               <button @click="updateSignatureArea(area)" class="btn btn-warning">Cập nhật</button>
             </div>
           </div>
-          <div v-if="isDrawing" class="drawing-area"
+          <div v-if="isDrawing" 
+            class="drawing-area"
             :style="{ top: drawingArea.y + 'px', left: drawingArea.x + 'px', width: drawingArea.width + 'px', height: drawingArea.height + 'px' }">
           </div>
         </div>
-      </div>
-      <div class="controls">
-        <button @click="toggleEmailSelect" class="btn btn-info">
-          {{ showEmailSelect ? 'Ẩn Chọn Người Ký' : 'Thêm Vùng Ký' }}
-        </button>
-        <div v-if="showEmailSelect" class="email-select-container">
-          <label for="email-select">Chọn người ký:</label>
-          <select v-model="selectedEmails" id="email-select" multiple @change="updateLinkedList">
-            <option v-for="email in emailList" :key="email" :value="email">
-              {{ email }}
-            </option>
-          </select>
+
+        <div class="controls">
+          <button @click="toggleEmailSelect" class="btn btn-info">
+            {{ showEmailSelect ? 'Ẩn Chọn Người Ký' : 'Thêm Vùng Ký' }}
+          </button>
+          <div v-if="showEmailSelect" class="email-select-container">
+            <label for="email-select">Chọn người ký:</label>
+            <select v-model="selectedEmails" id="email-select" multiple @change="updateLinkedList">
+              <option v-for="email in emailList" :key="email" :value="email">
+                {{ email }}
+              </option>
+            </select>
+          </div>
+          <button @click="saveSignatureArea" class="btn btn-success">Lưu Vùng Ký</button>
+          <button @click="completeSetup" class="btn btn-primary">Hoàn tất</button>
         </div>
-        <button @click="saveSignatureArea" class="btn btn-success">Lưu Vùng Ký</button>
-        <button @click="completeSetup" class="btn btn-primary">Hoàn tất</button>
-      </div>
-      <div class="selected-emails">
-        <h4>Email và Trình Tự Ký:</h4>
-        <ul>
-          <li v-for="(item, index) in linkedList" :key="index">
-            <div>
-              <span>{{ item.email }} - Trình tự: </span>
-              <select v-model="item.order" @change="updateOrder(index)">
-                <option v-for="num in totalEmails" :key="num" :value="num">{{ num }}</option>
-              </select>
-            </div>
-          </li>
-        </ul>
+        <div class="selected-emails">
+          <h4>Email và Trình Tự Ký:</h4>
+          <ul>
+            <li v-for="(item, index) in linkedList" :key="index">
+              <div>
+                <span>{{ item.email }} - Trình tự: </span>
+                <select v-model="item.order" @change="updateOrder(index)">
+                  <option v-for="num in totalEmails" :key="num" :value="num">{{ num }}</option>
+                </select>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -66,15 +71,14 @@
 <script setup>
 import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+//import NavBar from "./Processing.vue";
 
 // Ensure the correct path to the worker script
 GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs';
+
 const pdfFiles = ref([]);
 const pdfUrl = ref('');
-signatureAreas: [
-  { x: 10, y: 20, width: 100, height: 50, email: 'example@example.com' },
-  // Add more signature areas as needed
-];
+const signatureAreas = ref([]);
 const emailList = ref([]);
 const selectedEmails = ref([]);
 const showEmailSelect = ref(false);
@@ -91,13 +95,7 @@ let drawingStep = 0;
 onMounted(async () => {
   const files = localStorage.getItem('pdfFiles');
   if (files) {
-    //   pdfFiles.value = JSON.parse(files);
-    pdfFiles.value = [
-      {
-        name: "10",
-        url: "https://pdfobject.com/pdf/sample.pdf"
-      }
-    ]
+    pdfFiles.value = JSON.parse(files);
   }
 
   try {
@@ -123,7 +121,15 @@ watch(pdfUrl, async (newUrl) => {
     renderPdf(newUrl);
   }
 });
-
+// mounted() {
+//     const element = this.$refs.someElement;
+//     console.log(element); // Check if element is null
+//     if (element) {
+//         // Perform operations on the element
+//     } else {
+//         console.error('Element is null');
+//     }
+// };
 const showPdf = (file) => {
   pdfUrl.value = file.url;
 };
@@ -234,7 +240,7 @@ const saveSignatureArea = () => {
 
 const deleteSignatureArea = (areaToDelete) => {
   const indexToDelete = signatureAreas.value.indexOf(areaToDelete);
-
+  
   if (indexToDelete !== -1) {
     signatureAreas.value.splice(indexToDelete, 1);
     drawingStep--;
@@ -277,5 +283,238 @@ const totalEmails = computed(() => linkedList.value.length > 0 ? Math.max(...lin
 </script>
 
 <style scoped>
-/* @import '../assets/Display.css'; */
+/* Container and Layout */
+.container {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr 2.5fr 1fr; /* Slightly adjusted column widths for better balance */
+    gap: 20px;
+    padding: 20px;
+    background-color: #f4f4f9;
+}
+
+.left-column,
+.middle-column,
+.right-column {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.left-column:hover,
+.middle-column:hover,
+.right-column:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Buttons and Controls */
+.btn {
+    padding: 5px 8px;
+    font-size: 16px;
+    border-radius: 6px;
+    transition: all 0.3s;
+    cursor: pointer;
+    margin-bottom: 15px;
+    width: 100%; /* Full width buttons */
+    border: none;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+    width: auto;
+}
+.btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    width: auto;
+}
+.btn-success {
+    background-color: #28a745;
+    color: #fff;
+    width: fit-content;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    color: #fff;
+    width: fit-content;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.btn:focus {
+    outline: 3px solid #007bff;
+    outline-offset: -2px;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+/* Email Selection and Order */
+.email-select-container label {
+    font-size: 14px;
+    margin-bottom: 10px;
+    display: block;
+    color: #495057;
+}
+
+.email-select-container select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #ffffff;
+    color: #495057;
+    transition: border-color 0.3s;
+}
+
+.email-select-container select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* Signature Areas */
+.signature-area {
+    position: absolute;
+    border: 2px solid #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.drawing-area {
+    position: absolute;
+    border: 2px dashed #6c757d;
+    background-color: rgba(108, 117, 125, 0.1);
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.pdf-container {
+    position: relative;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    overflow-y: auto;
+}
+.pdf-canvas {
+    z-index: 1;
+    height: fit-content;
+}
+
+.signature-area, .drawing-area {
+    position: absolute;
+    z-index: 2; /* Ensure it's above the canvas */
+    border: 2px dashed #00f;
+}
+/* File List */
+.right-column .title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #343a40;
+    border-bottom: 2px solid #ced4da;
+    padding-bottom: 10px;
+    width: fit-content;
+}
+
+.file-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px; /* Limit file list height */
+    overflow-y: auto;
+}
+
+.file-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s;
+    width: fit-content;
+}
+
+.file-item:hover {
+    background-color: #dee2e6;
+}
+
+.file-item button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.file-item button:focus {
+    outline: 3px solid #007bff;
+    outline-offset: -2px;
+}
+
+.file-item button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr 2fr 1fr; /* Adjusted layout for medium screens */
+    }
+
+    .btn {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr; /* Single column layout */
+    }
+
+    .left-column,
+    .middle-column,
+    .right-column {
+        padding: 15px;
+    }
+
+    .btn {
+        width: auto; /* Reset button width on small screens */
+        padding: 10px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 15px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+
 </style>

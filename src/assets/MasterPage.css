@@ -18,7 +18,23 @@
   color: white;
   transition: background-color 0.3s, box-shadow 0.3s;
 }
-
+.btn-secondary {
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-size: 16px;
+  background-color: #6c757d;
+  color: white;
+  transition: background-color 0.3s, box-shadow 0.3s;height: fit-content;
+  width: 200px;
+  height: auto;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+.btn-outline-secondary{
+  margin-top: auto;
+  margin-bottom: auto;
+  height: auto;
+}
 .btn-success:hover {
   background-color: #218838;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

@@ -25,7 +25,7 @@
                     @click="selectContact(contact)">
                     <img :src="contact.avatar" alt="Avatar" class="avatar-img me-3" />
                     <div>
-                      <div>{{ contact.name }}</div>
+                      <div>{{ contact.customer_name }}</div>
                       <div class="text-muted">{{ contact.email }}</div>
                     </div>
                   </li>
@@ -182,6 +182,12 @@ export default {
     openModal() {
       this.showModal = true;
       this.autoCloseModal();
+      this.$nextTick(() => {
+        const searchInput = document.getElementById('contactSearchInput');
+        if (searchInput) {
+          searchInput.focus();
+        }
+      });
     },
     closeModal() {
       this.showModal = false;
@@ -296,7 +302,7 @@ export default {
     handleNext() {
       this.showErrors = true; // Show errors if any
       const isValid = this.validateForm();
-      
+
       if (isValid && this.signers.every(signer => signer.name && signer.email)) {
         // Lưu thông tin người ký và người nhận vào localStorage
         const data = {
@@ -312,17 +318,15 @@ export default {
       }
     },
     loadSavedData() {
-    const savedData = localStorage.getItem('signersRecipientsData');
-    
-    if (savedData) {
-      const parsedData = JSON.parse(savedData);
-      console.log("Signers and Recipients Data:", parsedData);
-    } else {
-      console.log("No data found in localStorage.");
-    }
-  }
+      const savedData = localStorage.getItem('signersRecipientsData');
 
-    
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        console.log("Signers and Recipients Data:", parsedData);
+      } else {
+        console.log("No data found in localStorage.");
+      }
+    }
   }
 };
 </script>

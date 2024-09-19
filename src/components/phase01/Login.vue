@@ -10,9 +10,9 @@
     <div class="inner">
       <div class="login-box container bg-light p-4 rounded shadow-sm">
         <img
-          src="../assets/d.png"
+          src="data:image/png;base64,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"
           alt="" class="img">
-        <h1 class="text-center">Đăng nhập</h1>
+        <h1 class="text-center">Chào mừng bạn trở lại!</h1>
         <Form @submit="handleSubmit" v-slot="{ errors }">
           <div class="form-group">
             <label for="email" class="form-label">Tài khoản (E-mail)</label>
@@ -28,7 +28,7 @@
               <div class="input-group">
                 <input v-bind="field" :type="passwordFieldType" id="password" placeholder="•••••••" class="form-control"
                   @input="handleInput('password', meta)" @blur="handleBlur('password', meta)" />
-                <button class="btn btn-outline-secondary" type="button" @click="togglePasswordVisibility">
+                <button class="btn-toggle" type="button" @click="togglePasswordVisibility">
                   <img
                     :src="passwordFieldType === 'password' ? 'https://www.svgrepo.com/show/532465/eye-slash.svg' : 'https://www.svgrepo.com/show/532493/eye.svg'"
                     alt="Toggle Password Visibility" style="width: 20px;">
@@ -70,7 +70,7 @@
           </p>
           <div class="mt-3 text-center opacity">
             <a href="#"><i class="bi bi-cloud-download"></i>Tools ký USB tokens</a>
-            <a class="ms-3" href="#"><i class="bi bi-file-earmark-text"></i>Hướng dẫn sử dụng</a>
+            <a class="ms-3" href="#">Hướng dẫn sử dụng</a>
           </div>
         </Form>
       </div>
@@ -222,7 +222,6 @@ export default {
 }
 
 .password-toggle img {
-  width: 24px; /* Slightly larger icon */
   height: auto;
 }
 
@@ -241,7 +240,10 @@ a i {
   margin-right: 8px; /* Adjust the spacing as needed */
 }
 
-
+.btn-toggle {
+  background-color: transparent; 
+  border-color: blue;
+}
 @media (max-width: 768px) {
   .text-overlay {
     font-size: 14px; 
