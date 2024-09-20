@@ -4,8 +4,9 @@
       <Sidebar />
       <div class="col-md-10 p-4">
         <Header />
-        <Navbar/>
+        <Navbar />
         <div class="row">
+          <!-- Left Column: Controls -->
           <div class="col-md-3 left-column">
             <div class="controls">
               <button @click="toggleEmailSelect" class="btn btn-info">
@@ -24,12 +25,12 @@
             </div>
           </div>
 
-          
+          <!-- Middle Column: PDF Viewer and Signature Drawing -->
           <div class="col-md-6 middle-column">
-            <div class="pdf-container" ref="containerRef" @mousedown="startDrawing" @mousemove="draw" @mouseup="endDrawing">
-              <canvas v-for="page in pages" :key="page.num" class="pdf-canvas" :ref="'canvas-' + page.num"
+            <div class="pdf-container" ref="containerRef" @mousedown="startDrawing(null, $event)" @mousemove="draw" @mouseup="endDrawing">
+              <canvas v-for="page in pages" :key="page.num" :ref="'canvas-' + page.num"
                 @mousedown="startDrawing(page.num, $event)" @mousemove="draw" @mouseup="endDrawing"></canvas>
-              <!-- Vùng ký đã vẽ -->
+              <!-- Signature Areas -->
               <div v-for="(area, index) in signatureAreas" :key="index"
                 :style="{ top: area.y + 'px', left: area.x + 'px', width: area.width + 'px', height: area.height + 'px' }"
                 class="signature-area" @mouseover="hoveredArea = area" @mouseleave="hoveredArea = null">
@@ -45,6 +46,7 @@
             </div>
           </div>
 
+          <!-- Right Column: File List -->
           <div class="col-md-3 right-column">
             <h4 class="title">Tài liệu ({{ pdfFiles.length }})</h4>
             <ul class="file-list">
@@ -56,11 +58,11 @@
             </ul>
           </div>
         </div>
-        <div>
-          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <button class="btn btn-secondary me-md-2" type="button" @click="handleBack">Quay lại</button>
-            <button class="btn btn-primary" type="button" @click="handleNext">Gửi yêu cầu</button>
-          </div>
+
+        <!-- Navigation Buttons -->
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+          <button class="btn btn-secondary me-md-2" type="button" @click="handleBack">Quay lại</button>
+          <button class="btn btn-primary" type="button" @click="handleNext">Gửi yêu cầu</button>
         </div>
       </div>
     </div>
@@ -68,20 +70,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed, nextTick } from 'vue';
+import { ref, onMounted, nextTick, watch } from 'vue';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
 import Navbar from '../layout/Processing.vue';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 import { useRouter } from 'vue-router';
 
+// PDF.js worker setup
 GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs';
-const router = useRouter();
 
 const pdfFiles = ref([]);
 const pdfUrl = ref('');
 const signatureAreas = ref([]);
-const emailList = ref([]);
 const selectedEmails = ref([]);
 const showEmailSelect = ref(false);
 const linkedList = ref([]);
@@ -90,23 +91,22 @@ const isDrawing = ref(false);
 const drawingArea = ref({ x: 0, y: 0, width: 0, height: 0 });
 const hoveredArea = ref(null);
 const pages = ref([]);
-let startX = 0;
-let startY = 0;
+const startX = ref(0);
+const startY = ref(0);
 let drawingStep = 0;
+const router = useRouter();
 
 const handleBack = () => {
   router.push('/Them-nguoi');
 };
 
-// Function to handle the "Next" button click
 const handleNext = () => {
   router.push('/Xac-nhan');
 };
 
-// On component mount
 onMounted(async () => {
   loadPdfFilesFromLocalStorage();
-  await fetchSigners(); // Fetch only signers
+  await fetchSigners();
 
   if (linkedList.value.length > 0) {
     selectedEmails.value = linkedList.value.map(item => item.email);
@@ -125,16 +125,11 @@ watch(pdfUrl, async (newUrl) => {
   }
 });
 
-// Function to load PDF files from local storage
 const loadPdfFilesFromLocalStorage = () => {
   const files = localStorage.getItem('pdfFiles');
   if (files) {
-    //pdfFiles.value = JSON.parse(files);
     pdfFiles.value = [
-      {
-        name: "10",
-        url: "https://pdfobject.com/pdf/sample.pdf"
-      }
+      { name: "Sample PDF", url: "https://pdfobject.com/pdf/sample.pdf" }
     ];
   }
 };
@@ -146,8 +141,6 @@ const fetchSigners = async () => {
       const data = JSON.parse(savedContacts);
       linkedList.value = data.signers.map((signer, index) => ({ email: signer.email, order: index + 1 }));
       selectedEmails.value = linkedList.value.map(item => item.email);
-    } else {
-      console.warn('No signers list found in localStorage.');
     }
   } catch (error) {
     console.error('Error fetching signers list:', error.message);
@@ -161,10 +154,7 @@ const showPdf = (file) => {
 const renderPdf = async (url) => {
   try {
     const container = containerRef.value;
-    if (!container) {
-      console.error('Container element is not found.');
-      return;
-    }
+    if (!container) return;
 
     const loadingTask = getDocument(url);
     const pdf = await loadingTask.promise;
@@ -179,19 +169,13 @@ const renderPdf = async (url) => {
 
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
-      if (!context) {
-        console.error('2D context is not available.');
-        continue;
-      }
+      if (!context) continue;
 
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       container.appendChild(canvas);
 
-      const renderContext = {
-        canvasContext: context,
-        viewport: viewport,
-      };
+      const renderContext = { canvasContext: context, viewport: viewport };
       await page.render(renderContext).promise;
 
       pages.value.push({ num: pageNum, canvas });
@@ -201,169 +185,99 @@ const renderPdf = async (url) => {
   }
 };
 
-// Function to start drawing
+const toggleEmailSelect = () => {
+  showEmailSelect.value = !showEmailSelect.value;
+  if (showEmailSelect.value) {
+    fetchSigners();
+  }
+};
+
 const startDrawing = (pageNum, event) => {
-  if (isDrawing.value === false && signatureAreas.value.length >= linkedList.value.length) {
+  if (isDrawing.value || signatureAreas.value.length >= linkedList.value.length) {
     alert('Đã hoàn thành việc vẽ vùng ký cho tất cả người ký.');
     return;
   }
 
-  const container = containerRef.value;
-  if (!container) return;
-
-  const canvas = event.target;
-  const rect = canvas.getBoundingClientRect();
-  startX = event.clientX - rect.left;
-  startY = event.clientY - rect.top;
+  const rect = event.target.getBoundingClientRect();
+  startX.value = event.clientX - rect.left;
+  startY.value = event.clientY - rect.top;
   isDrawing.value = true;
 
-  drawingArea.value = {
-    x: startX,
-    y: startY,
-    width: 0,
-    height: 0,
-    page: pageNum,
-  };
+  drawingArea.value = { x: startX.value, y: startY.value, width: 0, height: 0 };
 };
 
-// Function to draw the rectangle
 const draw = (event) => {
   if (!isDrawing.value) return;
 
-  const canvas = event.target;
-  const rect = canvas.getBoundingClientRect();
+  const rect = event.target.getBoundingClientRect();
   const currentX = event.clientX - rect.left;
   const currentY = event.clientY - rect.top;
 
   drawingArea.value = {
-    ...drawingArea.value,
-    width: Math.abs(currentX - startX),
-    height: Math.abs(currentY - startY),
+    x: startX.value,
+    y: startY.value,
+    width: currentX - startX.value,
+    height: currentY - startY.value,
   };
-
-  const context = canvas.getContext('2d');
-  if (context) {
-    context.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas for testing
-    context.strokeRect(drawingArea.value.x, drawingArea.value.y, drawingArea.value.width, drawingArea.value.height);
-  }
 };
 
-// Function to end drawing
-const endDrawing = (event) => {
-  if (!isDrawing.value) return;
-
-  isDrawing.value = false;
-
-  if (linkedList.value.length > 0 && drawingStep < linkedList.value.length) {
-    const canvas = event.target;
-    const pageNum = pages.value.find(p => p.canvas === canvas)?.num;
-    if (pageNum === undefined) {
-      console.error('Page number not found for the canvas.');
-      return;
-    }
-
+const endDrawing = () => {
+  if (isDrawing.value) {
+    const email = selectedEmails.value[drawingStep];
     signatureAreas.value.push({
-      page: pageNum,
       ...drawingArea.value,
-      email: linkedList.value[drawingStep].email,
-      borderColor: 'red',
+      email,
     });
     drawingStep++;
-  } else {
-    alert('Vui lòng chọn người ký trước khi vẽ vùng ký.');
-  }
 
-  drawingArea.value = { x: 0, y: 0, width: 0, height: 0 };
-};
-
-// Function to toggle email select dropdown
-const toggleEmailSelect = () => {
-  showEmailSelect.value = !showEmailSelect.value;
-  if (showEmailSelect.value) {
-    fetchSigners(); // Fetch signers if dropdown is shown
+    isDrawing.value = false;
+    drawingArea.value = { x: 0, y: 0, width: 0, height: 0 };
   }
 };
 
-const addSigner = (email, order) => {
-  const existingIndex = linkedList.value.findIndex(signer => signer.order === order);
-  if (existingIndex !== -1) {
-    linkedList.value.splice(existingIndex + 1, 0, {
-      email: email,
-      order: order + 1,
-      selectedAt: new Date().getTime(),
-    });
-    for (let i = existingIndex + 2; i < linkedList.value.length; i++) {
-      linkedList.value[i].order += 1;
-    }
-  } else {
-    linkedList.value.push({
-      email: email,
-      order: order,
-      selectedAt: new Date().getTime(),
-    });
-  }
-
-  // Sort the linked list by order and selectedAt
-  linkedList.value = linkedList.value.sort((a, b) => a.order - b.order || a.selectedAt - b.selectedAt);
-};
-
-const updateLinkedList = () => {
-  linkedList.value = selectedEmails.value.map((email, index) => ({
-    email: email,
-    order: index + 1,
-    selectedAt: new Date().getTime(),
-  })).sort((a, b) => a.order - b.order || a.selectedAt - b.selectedAt);
-  console.log('Selected emails:', selectedEmails.value);
-};
-
-// Function to update signature area
-const updateSignatureArea = (area) => {
-  const updatedArea = signatureAreas.value.find(a => a === area);
-  if (updatedArea) {
-    updatedArea.email = prompt('Cập nhật email cho vùng ký:', updatedArea.email) || updatedArea.email;
-  }
-};
-
-// Function to save signature area
 const saveSignatureArea = () => {
-  if (signatureAreas.value.length !== linkedList.value.length) {
-    alert('Vui lòng hoàn thành việc vẽ vùng ký cho tất cả người ký.');
-    return;
+  if (signatureAreas.value.length === 0) {
+    alert('Vui lòng vẽ ít nhất một vùng ký.');
+  } else {
+    alert('Vùng ký đã được lưu thành công.');
   }
-
-  // Save signature areas
-  localStorage.setItem('signatureAreas', JSON.stringify(signatureAreas.value));
-  alert('Đã lưu vùng ký thành công.');
 };
 
-// Function to complete the setup
 const completeSetup = () => {
-  saveSignatureArea();
-  // Redirect to the next step or perform any further actions
-  handleNext();
+  if (signatureAreas.value.length === 0) {
+    alert('Vui lòng vẽ ít nhất một vùng ký.');
+  } else {
+    alert('Đã hoàn thành thiết lập ký.');
+    handleNext();
+  }
 };
 
-// Function to update order in the linked list
-const updateOrder = (index) => {
-  const reorderedList = [...linkedList.value];
-  const [movedItem] = reorderedList.splice(index, 1);
-  reorderedList.splice(movedItem.order - 1, 0, movedItem);
-  linkedList.value = reorderedList.map((item, idx) => ({
-    ...item,
-    order: idx + 1,
-  }));
-};
-
-// Function to delete a signature area
 const deleteSignatureArea = (area) => {
-  signatureAreas.value = signatureAreas.value.filter(a => a !== area);
+  signatureAreas.value = signatureAreas.value.filter(item => item !== area);
+  drawingStep--;
 };
 
-// Computed properties
-const totalEmails = computed(() => emailList.value.length);
-
+const updateSignatureArea = (area) => {
+  // Implement logic for updating a specific signature area
+};
 </script>
 
-<style>
+<style scoped>
 @import '@/assets/Display.css';
+.pdf-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.signature-area {
+  position: absolute;
+  border: 2px dashed #007bff;
+  background: rgba(0, 123, 255, 0.1);
+}
+
+.drawing-area {
+  position: absolute;
+  border: 2px solid #28a745;
+  background: rgba(40, 167, 69, 0.2);
+}
 </style>

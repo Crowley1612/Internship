@@ -16,8 +16,8 @@
       <!-- PDF Viewer -->
       <div v-if="pdfUrl" class="pdf-viewer">
         <h4 class="viewer-title">PDF Viewer</h4>
-        <div class="pdf-container" ref="containerRef" @mousedown="startDrawing" @mousemove="draw" @mouseup="endDrawing">
-          <canvas v-for="page in pages" :key="page.num" class="pdf-canvas"></canvas>
+        <div class="pdf-container">
+          <canvas ref="canvasRef" @mousedown="startDrawing" @mousemove="draw" @mouseup="stopDrawing"></canvas>
           <div v-for="(area, index) in signatureAreas" :key="index"
             :style="{ top: area.y + 'px', left: area.x + 'px', width: area.width + 'px', height: area.height + 'px' }"
             class="signature-area"
@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed, nextTick } from 'vue';
+import { ref, onMounted ,onBeforeUnmount, watch, computed, nextTick } from 'vue';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
 //import NavBar from "./Processing.vue";
 
@@ -84,6 +84,7 @@ const selectedEmails = ref([]);
 const showEmailSelect = ref(false);
 const linkedList = ref([]);
 const containerRef = ref(null);
+const canvasRef = ref(null);
 const isDrawing = ref(false);
 const drawingArea = ref({ x: 0, y: 0, width: 0, height: 0 });
 const hoveredArea = ref(null);
@@ -176,59 +177,85 @@ const renderPdf = async (url) => {
 };
 
 const startDrawing = (event) => {
-  if (isDrawing.value === false && signatureAreas.value.length >= linkedList.value.length) {
-    alert('Đã hoàn thành việc vẽ vùng ký cho tất cả người ký.');
-    return;
-  }
-
-  const container = containerRef.value;
-  if (!container) return;
-  const rect = container.getBoundingClientRect();
-  startX = event.clientX - rect.left;
-  startY = event.clientY - rect.top;
   isDrawing.value = true;
+  const canvas = canvasRef.value;
+  if (canvas) {
+    const rect = canvas.getBoundingClientRect();
+    drawingArea.value.startX = event.clientX - rect.left;
+    drawingArea.value.startY = event.clientY - rect.top;
+  }
 };
+
 
 const draw = (event) => {
   if (!isDrawing.value) return;
 
-  const container = containerRef.value;
-  if (!container) return;
-  const rect = container.getBoundingClientRect();
-  const currentX = event.clientX - rect.left;
-  const currentY = event.clientY - rect.top;
+  const canvas = canvasRef.value;
+  if (canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const currentX = event.clientX - rect.left;
+    const currentY = event.clientY - rect.top;
 
-  drawingArea.value = {
-    x: Math.min(startX, currentX),
-    y: Math.min(startY, currentY),
-    width: Math.abs(currentX - startX),
-    height: Math.abs(currentY - startY)
-  };
+    drawingArea.value.width = currentX - drawingArea.value.startX;
+    drawingArea.value.height = currentY - drawingArea.value.startY;
+
+    const context = canvas.getContext('2d');
+    if (context) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.strokeRect(
+        drawingArea.value.startX,
+        drawingArea.value.startY,
+        drawingArea.value.width,
+        drawingArea.value.height
+      );
+    }
+  }
 };
-
-const endDrawing = () => {
-  if (!isDrawing.value) return;
-
-  const { width, height } = drawingArea.value;
-  if (width < 15 || height < 15) {
-    alert('Kích thước vùng ký phải lớn hơn 15x15px.');
-    return;
-  }
-
-  if (signatureAreas.value.length < linkedList.value.length) {
-    const signer = linkedList.value[drawingStep];
-    signatureAreas.value.push({
-      ...drawingArea.value,
-      email: signer.email
-    });
-    drawingStep++;
-  } else {
-    alert('Bạn đã vẽ đủ các vùng ký cần thiết.');
-  }
-
+const stopDrawing = () => {
   isDrawing.value = false;
-  drawingArea.value = { x: 0, y: 0, width: 0, height: 0 };
 };
+
+onMounted(async () => {
+  const canvas = canvasRef.value;
+  if (canvas) {
+    canvas.width = 800; // Set canvas width
+    canvas.height = 600; // Set canvas height
+  }
+});
+
+onBeforeUnmount(() => {
+  const canvas = canvasRef.value;
+  if (canvas) {
+    const context = canvas.getContext('2d');
+    if (context) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+});
+
+// const endDrawing = () => {
+//   if (!isDrawing.value) return;
+
+//   const { width, height } = drawingArea.value;
+//   if (width < 15 || height < 15) {
+//     alert('Kích thước vùng ký phải lớn hơn 15x15px.');
+//     return;
+//   }
+
+//   if (signatureAreas.value.length < linkedList.value.length) {
+//     const signer = linkedList.value[drawingStep];
+//     signatureAreas.value.push({
+//       ...drawingArea.value,
+//       email: signer.email
+//     });
+//     drawingStep++;
+//   } else {
+//     alert('Bạn đã vẽ đủ các vùng ký cần thiết.');
+//   }
+
+//   isDrawing.value = false;
+//   drawingArea.value = { x: 0, y: 0, width: 0, height: 0 };
+// };
 
 const saveSignatureArea = () => {
   if (signatureAreas.value.length === 0) {
