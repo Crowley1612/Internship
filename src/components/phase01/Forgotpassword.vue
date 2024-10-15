@@ -29,7 +29,7 @@ export default {
   max-width: 500px;
   margin: 50px auto;
   padding: 30px;
-  background-color: #ffffff;
+  background-color:#E0FFFF;
   border-radius: 10px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   font-family: 'Arial', sans-serif;

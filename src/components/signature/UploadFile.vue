@@ -5,8 +5,9 @@
             <div class="col p-4">
                 <Header />
                 <h1 class="text-center mb-4">Tải lên tài liệu mới</h1>
+
                 <!-- File Upload Area -->
-                <div class="upload-area" @dragover="handleDragOver" @drop="handleDrop">
+                <div class="upload-area" @dragover.prevent @drop="handleDrop">
                     <div class="upload-icon">
                         <i class="bi bi-cloud-upload"></i>
                     </div>
@@ -49,28 +50,14 @@ import Header from '../layout/Header.vue';
 export default {
     components: {
         Sidebar,
-        Header
+        Header,
     },
     setup() {
         const router = useRouter();
-        const categories = ref(['Danh mục 1', 'Danh mục 2', 'Danh mục 3']);
-        const folders = ref(['Thư mục 1', 'Thư mục 2', 'Thư mục 3']);
-
-        const selectedCategory = ref('');
-        const newCategory = ref('');
-        const selectedFolder = ref('');
-        const newFolder = ref('');
         const uploadProgress = ref(0);
         const uploadedFiles = reactive([]);
 
-        const handleDragOver = (e) => {
-            e.preventDefault();
-        };
-
-        const handleDrop = (e) => {
-            e.preventDefault();
-            handleFiles(e.dataTransfer.files);
-        };
+        const fileInput = ref(null);
 
         const handleFileSelect = (e) => {
             handleFiles(e.target.files);
@@ -82,13 +69,13 @@ export default {
                 return;
             }
 
-            for (const file of files) {
+            Array.from(files).forEach(file => {
                 if (file.size > 4 * 1024 * 1024) {
                     alert(`File ${file.name} vượt quá kích thước cho phép (4MB)`);
-                    continue;
+                } else {
+                    uploadFile(file);
                 }
-                uploadFile(file);
-            }
+            });
         };
 
         const uploadFile = async (file) => {
@@ -97,16 +84,13 @@ export default {
 
             try {
                 const response = await axios.post('http://localhost:5000/upload', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
+                    headers: { 'Content-Type': 'multipart/form-data' },
                     responseType: 'blob',
                     onUploadProgress: (progressEvent) => {
                         if (progressEvent.lengthComputable) {
-                            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                            uploadProgress.value = percentCompleted;
+                            uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                         }
-                    }
+                    },
                 });
 
                 const originalFilename = file.name.replace(/\.[^/.]+$/, "");
@@ -114,64 +98,45 @@ export default {
 
                 uploadedFiles.push(convertedFile);
 
-                localStorage.setItem('pdfFiles', JSON.stringify(uploadedFiles.map(f => ({
-                    name: f.name,
-                    url: URL.createObjectURL(f)
-                }))));
+                const fileObject = {
+                    name: convertedFile.name,
+                    url: URL.createObjectURL(convertedFile),
+                };
 
-                window.URL.revokeObjectURL(response.data);
+                localStorage.setItem('pdfFiles', JSON.stringify([fileObject]));
 
-                // Navigate to the EditFile Page with the uploaded file information
                 router.push({
                     name: 'EditFile',
                     params: {
                         fileName: convertedFile.name,
-                        fileUrl: URL.createObjectURL(convertedFile)
-                    }
+                        fileUrl: fileObject.url,
+                    },
                 });
 
+                // Clean up after file is no longer needed
+                URL.revokeObjectURL(fileObject.url);
             } catch (error) {
                 console.error('Error uploading file:', error);
             }
         };
 
         const triggerFileSelect = () => {
-            document.querySelector('input[type="file"]').click();
-        };
-
-        const formatFolderName = () => {
-            newFolder.value = removeAccents(newFolder.value).replace(/\s+/g, '-').toLowerCase();
+            fileInput.value.click();
         };
 
         return {
-            categories,
-            folders,
-            selectedCategory,
-            newCategory,
-            selectedFolder,
-            newFolder,
-            handleDragOver,
-            handleDrop,
-            handleFileSelect,
-            triggerFileSelect,
             uploadProgress,
             uploadedFiles,
-            formatFolderName,
-            formatFileSize(size) {
-                const units = ['B', 'KB', 'MB', 'GB'];
-                let index = 0;
-                while (size >= 1024 && index < units.length - 1) {
-                    size /= 1024;
-                    index++;
-                }
-                return `${size.toFixed(1)} ${units[index]}`;
-            }
+            fileInput,
+            handleFileSelect,
+            triggerFileSelect,
+            handleDrop: (e) => handleFiles(e.dataTransfer.files),
         };
-    }
+    },
 };
 </script>
+
 
 <style scoped>
 @import '@/assets/UploadFile.css';
 </style>
-

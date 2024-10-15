@@ -1,41 +1,17 @@
-[
-    {
-      "maVB": 72925,
-      "tenVanBan": "BL_06-2024_Đỗ thị Thu Hằng_22ZMGGN7.pdf",
-      "nguoiGui": "dochuc@cavn.vn",
-      "nguoiNhan": "hangdtt@cavn.vn",
-      "thoiGianCapNhat": "05-07-2024 17:22:42",
-      "trangThai": "Đã hoàn tất",
-      "trinhTuKy": 4,
-      "danhMuc": "Danh mục hệ thống",
-      "ghiChu": "",
-      "isChecked": false
-    },
-
-    {
-      "maVB": 72857,
-      "tenVanBan": "Lamthem_Hang_062024.doc",
-      "nguoiGui": "hangdtt@cavn.vn",
-      "nguoiNhan": "dangvucuong@gmail.com",
-      "thoiGianCapNhat": "01-07-2024 16:51:29",
-      "trangThai": "Đã hoàn tất",
-      "trinhTuKy": 2,
-      "danhMuc": "Giấy đề nghị",
-      "ghiChu": "",
-      "isChecked": false
-    },
-
+{
+  "document": [
     {
       "maVB": 72407,
       "tenVanBan": "TEST.docx",
       "nguoiGui": "tunghd.ca2@gmail.com",
       "nguoiNhan": "hangdtt@cavn.vn",
       "thoiGianCapNhat": "10-06-2024 17:57:32",
-      "trangThai": "Chưa hoàn tất",
+      "trangThai": "Đang chờ ký",
       "trinhTuKy": 2,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "5bb4"
     },
     {
       "maVB": 72248,
@@ -47,7 +23,8 @@
       "trinhTuKy": 4,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "2b18"
     },
     {
       "maVB": 72247,
@@ -59,7 +36,8 @@
       "trinhTuKy": 4,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "1868"
     },
     {
       "maVB": 72246,
@@ -71,7 +49,8 @@
       "trinhTuKy": 4,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "7f9f"
     },
     {
       "maVB": 72926,
@@ -83,7 +62,8 @@
       "trinhTuKy": 1,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "9800"
     },
     {
       "maVB": 72858,
@@ -95,7 +75,8 @@
       "trinhTuKy": 3,
       "danhMuc": "Giấy đề nghị",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "0d99"
     },
     {
       "maVB": 72408,
@@ -107,7 +88,8 @@
       "trinhTuKy": 2,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "ea08"
     },
     {
       "maVB": 72249,
@@ -119,7 +101,8 @@
       "trinhTuKy": 5,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "b9c7"
     },
     {
       "maVB": 72250,
@@ -131,7 +114,8 @@
       "trinhTuKy": 3,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "de54"
     },
     {
       "maVB": 72927,
@@ -143,7 +127,8 @@
       "trinhTuKy": 2,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "11ad"
     },
     {
       "maVB": 72859,
@@ -155,7 +140,8 @@
       "trinhTuKy": 4,
       "danhMuc": "Giấy đề nghị",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "e6ce"
     },
     {
       "maVB": 72409,
@@ -167,7 +153,8 @@
       "trinhTuKy": 1,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "6e72"
     },
     {
       "maVB": 72251,
@@ -179,7 +166,8 @@
       "trinhTuKy": 2,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "85e1"
     },
     {
       "maVB": 72928,
@@ -191,7 +179,8 @@
       "trinhTuKy": 3,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "180c"
     },
     {
       "maVB": 72860,
@@ -203,7 +192,8 @@
       "trinhTuKy": 4,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "b0ad"
     },
     {
       "maVB": 72410,
@@ -215,7 +205,8 @@
       "trinhTuKy": 1,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "a2e9"
     },
     {
       "maVB": 72252,
@@ -227,7 +218,8 @@
       "trinhTuKy": 3,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "38ca"
     },
     {
       "maVB": 72929,
@@ -239,7 +231,8 @@
       "trinhTuKy": 4,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "6204"
     },
     {
       "maVB": 72861,
@@ -251,7 +244,8 @@
       "trinhTuKy": 5,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "2c4d"
     },
     {
       "maVB": 72411,
@@ -263,7 +257,8 @@
       "trinhTuKy": 2,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "7564"
     },
     {
       "maVB": 72253,
@@ -275,7 +270,8 @@
       "trinhTuKy": 3,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "3b3d"
     },
     {
       "maVB": 72930,
@@ -287,7 +283,8 @@
       "trinhTuKy": 1,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "3316"
     },
     {
       "maVB": 72862,
@@ -299,7 +296,8 @@
       "trinhTuKy": 4,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "b2e0"
     },
     {
       "maVB": 72412,
@@ -311,9 +309,9 @@
       "trinhTuKy": 2,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "e78c"
     },
-
     {
       "maVB": 72927,
       "tenVanBan": "BL_07-2024_Jane_Smith_22ZMGGN9.pdf",
@@ -324,55 +322,47 @@
       "trinhTuKy": 1,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "e693"
     },
     {
-        "maVB": 72928,
-        "tenVanBan": "BL_07-2024_Michael_Brown_22ZMGGNA.pdf",
-        "nguoiGui": "michael.brown@example.com",
-        "nguoiNhan": "susan.clark@example.com",
-        "thoiGianCapNhat": "12-07-2024 14:22:10",
-        "trangThai": "Đã hoàn tất",
-        "trinhTuKy": 2,
-        "danhMuc": "Giấy đề nghị",
-        "ghiChu": "",
-        "isChecked": false
+      "maVB": 72928,
+      "tenVanBan": "BL_07-2024_Michael_Brown_22ZMGGNA.pdf",
+      "nguoiGui": "michael.brown@example.com",
+      "nguoiNhan": "susan.clark@example.com",
+      "thoiGianCapNhat": "12-07-2024 14:22:10",
+      "trangThai": "Đã hoàn tất",
+      "trinhTuKy": 2,
+      "danhMuc": "Giấy đề nghị",
+      "ghiChu": "",
+      "isChecked": false,
+      "id": "b416"
     },
     {
-        "maVB": 72929,
-        "tenVanBan": "BL_07-2024_Emily_Davis_22ZMGGNB.pdf",
-        "nguoiGui": "emily.davis@example.com",
-        "nguoiNhan": "michael.brown@example.com",
-        "thoiGianCapNhat": "13-07-2024 11:30:45",
-        "trangThai": "Chưa hoàn tất",
-        "trinhTuKy": 3,
-        "danhMuc": "Danh mục hệ thống",
-        "ghiChu": "",
-        "isChecked": false
+      "maVB": 72929,
+      "tenVanBan": "BL_07-2024_Emily_Davis_22ZMGGNB.pdf",
+      "nguoiGui": "emily.davis@example.com",
+      "nguoiNhan": "michael.brown@example.com",
+      "thoiGianCapNhat": "13-07-2024 11:30:45",
+      "trangThai": "Chưa hoàn tất",
+      "trinhTuKy": 3,
+      "danhMuc": "Danh mục hệ thống",
+      "ghiChu": "",
+      "isChecked": false,
+      "id": "e9f6"
     },
     {
-        "maVB": 72930,
-        "tenVanBan": "BL_07-2024_David_Wilson_22ZMGGNC.pdf",
-        "nguoiGui": "david.wilson@example.com",
-        "nguoiNhan": "emily.davis@example.com",
-        "thoiGianCapNhat": "14-07-2024 16:45:00",
-        "trangThai": "Đã hoàn tất",
-        "trinhTuKy": 4,
-        "danhMuc": "Danh mục hệ thống",
-        "ghiChu": "",
-        "isChecked": false
-    },
-    {
-        "maVB": 72931,
-        "tenVanBan": "BL_07-2024_Linda_Johnson_22ZMGGND.pdf",
-        "nguoiGui": "linda.johnson@example.com",
-        "nguoiNhan": "david.wilson@example.com",
-        "thoiGianCapNhat": "15-07-2024 10:15:20",
-        "trangThai": "Chưa hoàn tất",
-        "trinhTuKy": 5,
-        "danhMuc": "Danh mục hệ thống",
-        "ghiChu": "",
-        "isChecked": false
+      "maVB": 72930,
+      "tenVanBan": "BL_07-2024_David_Wilson_22ZMGGNC.pdf",
+      "nguoiGui": "david.wilson@example.com",
+      "nguoiNhan": "emily.davis@example.com",
+      "thoiGianCapNhat": "14-07-2024 16:45:00",
+      "trangThai": "Đã hoàn tất",
+      "trinhTuKy": 4,
+      "danhMuc": "Danh mục hệ thống",
+      "ghiChu": "",
+      "isChecked": false,
+      "id": "0b11"
     },
     {
       "maVB": 72931,
@@ -384,21 +374,34 @@
       "trinhTuKy": 5,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
-      "isChecked": false
+      "isChecked": false,
+      "id": "c849"
     },
     {
-    "maVB": 72931,
-    "tenVanBan": "BL_07-2024_Linda_Johnson_22ZMGGND.pdf",
-    "nguoiGui": "linda.johnson@example.com",
-    "nguoiNhan": "david.wilson@example.com",
-    "thoiGianCapNhat": "15-07-2024 10:15:20",
-    "trangThai": "Chưa hoàn tất",
-    "trinhTuKy": 5,
-    "danhMuc": "Danh mục hệ thống",
-    "ghiChu": "",
-    "isChecked": false
+      "maVB": 72931,
+      "tenVanBan": "BL_07-2024_Linda_Johnson_22ZMGGND.pdf",
+      "nguoiGui": "linda.johnson@example.com",
+      "nguoiNhan": "david.wilson@example.com",
+      "thoiGianCapNhat": "15-07-2024 10:15:20",
+      "trangThai": "Chưa hoàn tất",
+      "trinhTuKy": 5,
+      "danhMuc": "Danh mục hệ thống",
+      "ghiChu": "",
+      "isChecked": false,
+      "id": "f023"
+    },
+    {
+      "maVB": 72931,
+      "tenVanBan": "BL_07-2024_Linda_Johnson_22ZMGGND.pdf",
+      "nguoiGui": "linda.johnson@example.com",
+      "nguoiNhan": "david.wilson@example.com",
+      "thoiGianCapNhat": "15-07-2024 10:15:20",
+      "trangThai": "Chưa hoàn tất",
+      "trinhTuKy": 5,
+      "danhMuc": "Danh mục hệ thống",
+      "ghiChu": "",
+      "isChecked": false,
+      "id": "cad1"
+    }
+  ]
 }
-
-]    
-
-

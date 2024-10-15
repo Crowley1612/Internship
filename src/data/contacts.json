@@ -1,47 +1,40 @@
-[
+{
+  "contacts": [
     {
-        "id": 1,
-        "name": "Nguyen Van A",
-        "email": "nguyenvana@example.com",
-        "avatar": "https://via.placeholder.com/50",
-        "phone_number": "92544545454",
-        "tax_code": "",
-        "organization_name": "test"
+      "id": "1",
+      "name": "Nguyen Van Be",
+      "email": "nguyenvana@example.com",
+      "avatar": "https://via.placeholder.com/50",
+      "phone_number": "92544545454",
+      "tax_code": "",
+      "organization_name": "test"
     },
     {
-        "id": 2,
-        "email": "hangdtt.smile@gmail.com",
-        "name": "Hằng",
-        "phone_number": "528248848",
-        "avatar": "https://via.placeholder.com/50",
-        "tax_code": "",
-        "organization_name": "abc"
+      "id": "3",
+      "email": "oanh@cavn.vn",
+      "name": "Bùi Thị Oanh",
+      "avatar": "https://via.placeholder.com/50",
+      "phone_number": "4353453",
+      "tax_code": "",
+      "organization_name": ""
     },
     {
-        "id": 3,
-        "email": "oanh@cavn.vn",
-        "name": "Bùi Thị Oanh",
-        "avatar": "https://via.placeholder.com/50",
-        "phone_number": "4353453",
-        "tax_code": "",
-        "organization_name": ""
+      "id": "4",
+      "email": "hangdtt@cavn.vn",
+      "name": "Đỗ Thị Thu Hằng",
+      "avatar": "https://via.placeholder.com/50",
+      "phone_number": "",
+      "tax_code": "",
+      "organization_name": ""
     },
     {
-        "id": 4,
-        "email": "hangdtt@cavn.vn",
-        "name": "Đỗ Thị Thu Hằng",
-        "avatar": "https://via.placeholder.com/50",
-        "phone_number": "",
-        "tax_code": "",
-        "organization_name": ""
-    },
-    {
-        "id": 5,
-        "email": "phamduongcntt60@gmail.com",
-        "name": "Phạm Thanh Dương",
-        "avatar": "https://via.placeholder.com/50",
-        "phone_number": "",
-        "tax_code": "",
-        "organization_name": ""
+      "id": "5",
+      "email": "phamduongcntt60@gmail.com",
+      "name": "Phạm Thanh Dương",
+      "avatar": "https://via.placeholder.com/50",
+      "phone_number": "",
+      "tax_code": "",
+      "organization_name": ""
     }
-]
+  ]
+}

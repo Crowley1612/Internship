@@ -342,7 +342,7 @@ function handleCancelModal() {
 
 
 <style scoped>
-
+@import '@/assets/MasterPage.css';
 @import '@/assets/Setting.css';
 
 .feedback-message {

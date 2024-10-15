@@ -224,6 +224,7 @@
 import axios from 'axios';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
+import { fetchData } from 'pdfjs-dist';
 export default {
   components: {
     Header,
@@ -365,13 +366,37 @@ export default {
 
   methods: {
     fetchData() {
-      axios.get('/src/data/data.json')
+      axios.get('http://localhost:3002/document')
         .then(response => {
           this.documents = response.data;
         })
         .catch(error => {
-          console.error('Error fetching data:', error);
+          console.error('There was an error!', error);
         });
+    },
+    deleteDocument(document) {
+      console.log("Attempting to delete document:", document);
+
+      if (!document.id) {
+        console.error("Invalid document ID. Cannot delete.", document);
+        alert("Invalid document ID. Cannot delete.");
+        return;
+      }
+
+      if (confirm("Bạn có chắc chắn xóa tài liệu này?")) {
+        axios
+          .delete(`http://localhost:3002/document/${document.id}`)
+          .then(() => {
+            this.documents = this.documents.filter(
+              (item) => item.id !== document.id
+            );
+            alert("Xóa thành công!");
+          })
+          .catch((error) => {
+            console.error("Error deleting document:", error); 
+            alert("Có lỗi xảy ra khi xóa."); 
+          });
+      }
     },
     gotoPage(page) {
       this.$router.push({ name: page });
@@ -461,9 +486,7 @@ export default {
     shareDocument(item) {
       console.log('Share:', item);
     },
-    deleteDocument(item) {
-      console.log('Delete:', item);
-    },
+   
     filterDocumentsByDate() {
       const start = new Date(this.startDate);
       const end = new Date(this.endDate);

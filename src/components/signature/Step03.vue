@@ -199,8 +199,8 @@ const startDrawing = (pageNum, event) => {
   }
 
   const rect = event.target.getBoundingClientRect();
-  startX.value = event.clientX - rect.left;
-  startY.value = event.clientY - rect.top;
+  startX.value = event.clientX;
+  startY.value = event.clientY;
   isDrawing.value = true;
 
   drawingArea.value = { x: startX.value, y: startY.value, width: 0, height: 0 };
@@ -210,8 +210,8 @@ const draw = (event) => {
   if (!isDrawing.value) return;
 
   const rect = event.target.getBoundingClientRect();
-  const currentX = event.clientX - rect.left;
-  const currentY = event.clientY - rect.top;
+  const currentX = event.clientX ;
+  const currentY = event.clientY;
 
   drawingArea.value = {
     x: startX.value,
@@ -267,6 +267,8 @@ const updateSignatureArea = (area) => {
 .pdf-container {
   position: relative;
   overflow: hidden;
+  width: fit-content;
+  height: fit-content;
 }
 
 .signature-area {

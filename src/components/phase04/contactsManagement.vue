@@ -7,11 +7,7 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h1>Quản lý danh bạ</h1>
           <div class="actions">
-            <router-link to="/Upload-file">
-              <button class="btn btn-success">
-                <i class="bi bi-plus"></i> Thêm mới liên lạc
-              </button>
-            </router-link>
+            <a-button type="primary" @click="showModal">+ Thêm mới danh bạ</a-button>
           </div>
         </div>
         <nav aria-label="Page navigation" class="mt-3">
@@ -168,13 +164,35 @@
         </div>
       </div>
     </div>
+    <!-- Modal -->
+    <a-modal title="Thêm mới danh bạ" v-model:open="isModalOpen" @ok="handleOk" @cancel="handleCancel">
+      <a-form layout="vertical" ref="contactForm">
+        <a-form-item label="Email:" :rules="[{ required: true, message: 'Vui lòng nhập email' }]">
+          <a-input v-model="newContact.email" />
+        </a-form-item>
+        <a-form-item label="Họ và tên:" :rules="[{ required: true, message: 'Vui lòng nhập họ và tên' }]">
+          <a-input v-model="newContact.name" />
+        </a-form-item>
+        <a-form-item label="Mã số thuế:" :rules="[{ required: true, message: 'Vui lòng nhập mã số thuế' }]">
+          <a-input v-model="newContact.tax_code" />
+        </a-form-item>
+        <a-form-item label="Công ty:" :rules="[{ required: true, message: 'Vui lòng nhập tên công ty' }]">
+          <a-input v-model="newContact.organization_name" />
+        </a-form-item>
+        <a-form-item label="Số điện thoại:" :rules="[{ required: true, message: 'Vui lòng nhập số điện thoại' }]">
+          <a-input v-model="newContact.phone_number" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
-import Sidebar from '../layout/Sidebar.vue';
-import Header from '../layout/Header.vue';
+import axios from "axios";
+import Sidebar from "../layout/Sidebar.vue";
+import Header from "../layout/Header.vue";
+import { is } from "@vee-validate/rules";
+import { h } from "vue";
 
 export default {
   components: {
@@ -184,19 +202,27 @@ export default {
   data() {
     return {
       documents: [],
-      searchField: '',
+      searchField: "",
       searchQueries: {
-        email: '',
-        name: '',
-        phone_number: '',
-        tax_code: '',
-        organization_name: ''
+        email: "",
+        name: "",
+        phone_number: "",
+        tax_code: "",
+        organization_name: "",
+      },
+      newContact: {
+        email: "",
+        name: "",
+        phone_number: "",
+        tax_code: "",
+        organization_name: "",
       },
       currentPage: 1,
       itemsPerPage: 10,
+      isModalOpen: false,
       gotoPage: 1,
-      sortKey: '',
-      sortOrder: 'asc',
+      sortKey: "",
+      sortOrder: "asc",
       editingDocument: null, // Document currently being edited
       originalDocument: null, // Original state of the document before editing
     };
@@ -206,13 +232,29 @@ export default {
   },
   computed: {
     filteredDocuments() {
-      return this.documents.filter(document => {
-        const matchesEmail = document.email.toLowerCase().includes(this.searchQueries.email.toLowerCase());
-        const matchesName = document.name.toLowerCase().includes(this.searchQueries.name.toLowerCase());
-        const matchesPhone = document.phone_number.toLowerCase().includes(this.searchQueries.phone_number.toLowerCase());
-        const matchesTaxCode = document.tax_code.toLowerCase().includes(this.searchQueries.tax_code.toLowerCase());
-        const matchesOrganization = document.organization_name.toLowerCase().includes(this.searchQueries.organization_name.toLowerCase());
-        return matchesEmail && matchesName && matchesPhone && matchesTaxCode && matchesOrganization;
+      return this.documents.filter((document) => {
+        const matchesEmail = document.email
+          .toLowerCase()
+          .includes(this.searchQueries.email.toLowerCase());
+        const matchesName = document.name
+          .toLowerCase()
+          .includes(this.searchQueries.name.toLowerCase());
+        const matchesPhone = document.phone_number
+          .toLowerCase()
+          .includes(this.searchQueries.phone_number.toLowerCase());
+        const matchesTaxCode = document.tax_code
+          .toLowerCase()
+          .includes(this.searchQueries.tax_code.toLowerCase());
+        const matchesOrganization = document.organization_name
+          .toLowerCase()
+          .includes(this.searchQueries.organization_name.toLowerCase());
+        return (
+          matchesEmail &&
+          matchesName &&
+          matchesPhone &&
+          matchesTaxCode &&
+          matchesOrganization
+        );
       });
     },
     totalPages() {
@@ -228,61 +270,57 @@ export default {
 
       return this.filteredDocuments.sort((a, b) => {
         const comparison = a[this.sortKey] > b[this.sortKey] ? 1 : -1;
-        return this.sortOrder === 'asc' ? comparison : -comparison;
+        return this.sortOrder === "asc" ? comparison : -comparison;
       });
-    }
+    },
   },
   methods: {
     deleteDocument(document) {
-      if (document && document.id) {
-        if (confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
-          this.documents = this.documents.filter(item => item.id !== document.id);
-          localStorage.setItem('documents', JSON.stringify(this.documents));
-        }
-      } else {
-        console.error('Invalid document or missing ID:', document);
+      console.log("Attempting to delete document:", document);
+
+      // Ensure the document has a valid ID
+      if (!document.id) {
+        console.error("Invalid document ID. Cannot delete.", document);
+        alert("Invalid document ID. Cannot delete.");
+        return; // Exit the method early
+      }
+
+      if (confirm("Bạn có chắc chắn muốn xóa liên hệ này?")) {
+        axios
+          .delete(`http://localhost:3000/contacts/${document.id}`)
+          .then(() => {
+            // Update the local documents array to reflect deletion
+            this.documents = this.documents.filter(
+              (item) => item.id !== document.id
+            );
+            alert("Xóa thành công!");
+          })
+          .catch((error) => {
+            console.error("Error deleting document:", error); // Log error
+            alert("Có lỗi xảy ra khi xóa."); // Error feedback
+          });
       }
     },
+
+    saveDocument(item) {
+      axios
+        .put(`http://localhost:3000/contacts/${item.id}`, item) // Gửi yêu cầu PUT
+        .then((response) => {
+          const index = this.documents.findIndex((doc) => doc.id === item.id);
+          if (index !== -1) {
+            this.documents.splice(index, 1, response.data); // Cập nhật tài liệu trong mảng cục bộ
+            alert("Cập nhật thành công!"); // Thông báo thành công
+          }
+        })
+        .catch((error) => {
+          console.error("Error updating document:", error);
+          alert("Có lỗi xảy ra khi cập nhật."); // Thông báo lỗi
+        });
+    },
+
     openEditModal(item) {
       this.originalDocument = { ...item }; // Clone the original document for possible rollback
       this.editingDocument = item; // Set the document to be edited
-    },
-    // async saveDocument(item) {
-    //     try {
-    //         // Gửi yêu cầu PUT đến máy chủ để cập nhật thông tin tài liệu
-    //         await axios.put(`https://your-api-endpoint/documents/${item.id}`, item);
-    //         // Làm mới dữ liệu để cập nhật bảng
-    //         this.fetchData();
-    //         // Đặt lại trạng thái chỉnh sửa và tài liệu gốc
-    //         this.editingDocument = null;
-    //         this.originalDocument = null;
-    //     } catch (error) {
-    //         console.error('Error updating document:', error);
-    //         // Tùy chọn: Khôi phục lại trạng thái gốc nếu việc cập nhật không thành công
-    //         const index = this.documents.findIndex(doc => doc.id === item.id);
-    //         if (index !== -1) {
-    //             this.documents[index] = this.originalDocument;
-    //         }
-    //     }
-    // },
-
-    saveDocument(item) {
-      // Tìm chỉ số của tài liệu cần cập nhật
-      const index = this.documents.findIndex(doc => doc.id === item.id);
-      if (this.editingDocument && this.editingDocument.id) {
-        const index = this.documents.findIndex(doc => doc.id === this.editingDocument.id);
-        if (index !== -1) {
-          this.documents.splice(index, 1, { ...this.editingDocument });
-          localStorage.setItem('documents', JSON.stringify(this.documents));
-        }
-        this.resetEditing();
-      } else {
-        console.error('Editing document is invalid or missing ID:', this.editingDocument);
-      }
-
-      // Kết thúc chỉnh sửa
-      this.editingDocument = null;
-      this.originalDocument = null;
     },
 
     changePage(page) {
@@ -293,12 +331,13 @@ export default {
       this.currentPage = 1;
     },
     fetchData() {
-      axios.get('/src/data/contacts.json')
-        .then(response => {
+      axios
+        .get("http://localhost:3000/contacts")
+        .then((response) => {
           this.documents = response.data;
         })
-        .catch(error => {
-          console.error('Error fetching data:', error);
+        .catch((error) => {
+          console.error("Error fetching data:", error);
         });
     },
     goToPage() {
@@ -308,16 +347,18 @@ export default {
       this.currentPage = 1;
     },
     toggleSearch(field) {
-      this.searchField = this.searchField === field ? '' : field;
+      this.searchField = this.searchField === field ? "" : field;
     },
     setSortKey(key) {
-      this.sortOrder = this.sortKey === key && this.sortOrder === 'asc' ? 'desc' : 'asc';
+      this.sortOrder =
+        this.sortKey === key && this.sortOrder === "asc" ? "desc" : "asc";
       this.sortKey = key;
     },
     cancelEdit() {
-      // Khôi phục tài liệu gốc nếu hủy chỉnh sửa
       if (this.editingDocument && this.originalDocument) {
-        const index = this.documents.findIndex(doc => doc.id === this.editingDocument.id);
+        const index = this.documents.findIndex(
+          (doc) => doc.id === this.editingDocument.id
+        );
         if (index !== -1) {
           this.documents.splice(index, 1, this.originalDocument);
         }
@@ -328,10 +369,31 @@ export default {
     },
     isEditing(document) {
       return this.editingDocument === document;
-    }
-  }
+    },
+    handleOk() {
+      const index = this.documents.findIndex(
+        (doc) => doc.id === this.editingDocument.id
+      );
+      if (index !== -1) {
+        this.documents.splice(index, 1, this.editingDocument);
+      }
+
+      this.editingDocument = null;
+      this.originalDocument = null;
+      this.isModalOpen = false;
+    },
+    handleCancel() {
+      this.editingDocument = null;
+      this.originalDocument = null;
+      this.isModalOpen = false;
+    },
+    showModal() {
+      this.isModalOpen = true;
+    },
+  },
 };
 </script>
+
 
 <style scoped>
 @import '@/assets/MasterPage.css';

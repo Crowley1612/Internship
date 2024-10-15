@@ -33,6 +33,7 @@
           </label>
           <div class="d-flex align-items-center">
             <select v-model="selectedCategory" class="form-select me-2" required>
+              <option value="" disabled selected>Chọn danh mục</option>
               <option v-for="category in categories" :key="category.id" :value="category.directory_name">
                 {{ category.directory_name }}
               </option>
@@ -52,6 +53,7 @@
           </label>
           <div class="custom-select-wrapper">
             <select v-model="selectedFolder" class="form-select" required>
+              <option value="" disabled selected>Chọn thư mục</option>
               <option v-for="folder in folders" :key="folder" :value="folder">
                 {{ folder }}
               </option>
@@ -77,16 +79,20 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue';
-import NavBar from '../layout/Processing.vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios'; // Make sure to import axios
+import Processing from '../layout/Processing.vue';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
+
+const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB'];
 
 export default {
   name: 'EditFile',
   components: {
     Header,
     Sidebar,
-    NavBar,
+    NavBar: Processing,
   },
   setup() {
     const uploadedFiles = reactive([]);
@@ -97,40 +103,26 @@ export default {
     const folders = ref([]);
     const selectedFolder = ref('');
     const newFolder = ref('');
-
-    onMounted(() => {
-      const files = localStorage.getItem('pdfFiles');
-      if (files) {
-        pdfFiles.value = JSON.parse(files);
-      }
-    });
+    const router = useRouter();
 
     const formatFileSize = (size) => {
-      const units = ['B', 'KB', 'MB', 'GB'];
       let index = 0;
-      while (size >= 1024 && index < units.length - 1) {
+      while (size >= 1024 && index < FILE_SIZE_UNITS.length - 1) {
         size /= 1024;
         index++;
       }
-      return `${size.toFixed(1)} ${units[index]}`;
+      return `${size.toFixed(1)} ${FILE_SIZE_UNITS[index]}`;
     };
 
     const confirmDelete = (file) => {
       if (confirm(`Bạn có chắc chắn muốn xóa file ${file.name}?`)) {
-        deleteFile(file);
+        pdfFiles.value = pdfFiles.value.filter((f) => f !== file);
+        localStorage.setItem('pdfFiles', JSON.stringify(pdfFiles.value));
       }
     };
 
-    const deleteFile = (file) => {
-      pdfFiles.value = pdfFiles.value.filter((f) => f !== file);
-      localStorage.setItem('pdfFiles', JSON.stringify(pdfFiles.value));
-    };
-
     const formatFolderName = () => {
-      newFolder.value = newFolder.value
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/\s+/g, '');
+      newFolder.value = newFolder.value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
     };
 
     const addFolder = () => {
@@ -138,25 +130,18 @@ export default {
         folders.value.push(newFolder.value);
         selectedFolder.value = newFolder.value;
         newFolder.value = '';
+      } else {
+        alert('Vui lòng nhập tên thư mục.');
       }
     };
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch('/src/data/directory.json');
-        const data = await response.json();
-        categories.value = data;
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-    onMounted(() => {
-      fetchCategories();
-    });
+
     const addCategory = () => {
       if (newCategory.value) {
-        categories.value.push(newCategory.value);
+        categories.value.push({ id: Date.now(), directory_name: newCategory.value });
         selectedCategory.value = newCategory.value;
         newCategory.value = '';
+      } else {
+        alert('Vui lòng nhập tên danh mục.');
       }
     };
 
@@ -174,15 +159,30 @@ export default {
 
     const handleNext = () => {
       if (validateForm()) {
-        // Navigate to the next step
-        window.location.href = '/Them-nguoi';
+        router.push('/Them-nguoi');
       }
     };
 
     const handleBack = () => {
-      // Navigate to the previous step
-      window.location.href = '/Upload-File';
+      router.push('/Upload-File');
     };
+
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/directory");
+        categories.value = response.data; // Correctly assigning fetched data to categories
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    onMounted(() => {
+      const files = localStorage.getItem('pdfFiles');
+      if (files) {
+        pdfFiles.value = JSON.parse(files);
+      }
+      fetchCategories();
+    });
 
     return {
       uploadedFiles,
@@ -195,18 +195,18 @@ export default {
       newFolder,
       formatFileSize,
       confirmDelete,
-      deleteFile,
       formatFolderName,
       addFolder,
       addCategory,
       validateForm,
-      fetchCategories,
       handleNext,
       handleBack,
     };
   },
 };
 </script>
+
+
 
 <style scoped>
 .container-fluid {

@@ -36,16 +36,8 @@
               </select>
             </div>
             <div class="ml-2">
-              <input
-                id="goto-page"
-                type="number"
-                class="form-control"
-                min="1"
-                :max="totalPages"
-                placeholder="Go to page"
-                v-model.number="gotoPage"
-                @keyup.enter="goToPage"
-              />
+              <input id="goto-page" type="number" class="form-control" min="1" :max="totalPages"
+                placeholder="Go to page" v-model.number="gotoPage" @keyup.enter="goToPage" />
             </div>
           </ul>
         </nav>
@@ -61,13 +53,8 @@
                     Tên danh mục
                     <i class="bi bi-search" @click="toggleSearch('directory_name')"></i>
                     <div v-if="searchField === 'directory_name'" class="search-box">
-                      <input
-                        type="text"
-                        placeholder="Nhập tên danh mục"
-                        v-model="searchQueries.directory_name"
-                        @input="filterDocuments"
-                        class="input-search"
-                      />
+                      <input type="text" placeholder="Nhập tên danh mục" v-model="searchQueries.directory_name"
+                        @input="filterDocuments" class="input-search" />
                     </div>
                   </div>
                 </th>
@@ -76,13 +63,8 @@
                     Ghi chú
                     <i class="bi bi-search" @click="toggleSearch('note')"></i>
                     <div v-if="searchField === 'note'" class="search-box">
-                      <input
-                        type="text"
-                        placeholder="Nhập ghi chú"
-                        v-model="searchQueries.note"
-                        @input="filterDocuments"
-                        class="input-search"
-                      />
+                      <input type="text" placeholder="Nhập ghi chú" v-model="searchQueries.note"
+                        @input="filterDocuments" class="input-search" />
                     </div>
                   </div>
                 </th>
@@ -122,22 +104,13 @@
     </div>
 
     <!-- Modal -->
-    <a-modal title="Thay đổi thông tin" v-model:open="isModalOpen" @ok="handleOk" @cancel="handleCancel">
+    <a-modal title="Thêm mới danh mục" v-model:open="isModalOpen" @ok="handleOk" @cancel="handleCancel">
       <a-form layout="vertical">
-        <a-form-item label="Họ và tên:">
-          <a-input v-model="editUser.name" />
+        <a-form-item label="Tên danh mục:">
+          <a-input v-model="newDirectory.name" />
         </a-form-item>
-        <a-form-item label="Mã số thuế:">
-          <a-input v-model="editUser.taxcode" />
-        </a-form-item>
-        <a-form-item label="Công ty:">
-          <a-input v-model="editUser.company" />
-        </a-form-item>
-        <a-form-item label="Tên tài khoản:">
-          <a-input v-model="editUser.username" />
-        </a-form-item>
-        <a-form-item label="Số điện thoại:">
-          <a-input v-model="editUser.phone" />
+        <a-form-item label="Ghi chú:">
+          <a-input v-model="newDirectory.note" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -165,17 +138,12 @@ export default {
       currentPage: 1,
       itemsPerPage: 5,
       gotoPage: 1,
-      sortKey: '',
-      sortOrder: 'asc',
       editingDocument: null,
       originalDocument: null,
       isModalOpen: false,
-      editUser: {
-        name: '',
-        taxcode: '',
-        company: '',
-        username: '',
-        phone: '',
+      newDirectory: {
+        directory_name: '',
+        note: ''
       },
     };
   },
@@ -185,48 +153,68 @@ export default {
   computed: {
     filteredDocuments() {
       return this.documents.filter((document) => {
-        const matchesDirectoryName = document.directory_name
-          .toLowerCase()
-          .includes(this.searchQueries.directory_name.toLowerCase());
-        const matchesNote = document.note.toLowerCase().includes(this.searchQueries.note.toLowerCase());
-        return matchesDirectoryName && matchesNote;
+        const directoryName = document.directory_name?.toLowerCase() || '';
+        const searchDirectoryName = this.searchQueries.directory_name?.toLowerCase() || '';
+        const note = document.note?.toLowerCase() || '';
+        const searchNote = this.searchQueries.note?.toLowerCase() || '';
+
+        return directoryName.includes(searchDirectoryName) && note.includes(searchNote);
       });
     },
     paginatedDocuments() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
-      return this.sortedDocuments.slice(start, start + this.itemsPerPage);
+      return this.filteredDocuments.slice(start, start + this.itemsPerPage);
     },
     totalPages() {
       return Math.ceil(this.filteredDocuments.length / this.itemsPerPage);
     },
-    sortedDocuments() {
-      if (!this.sortKey) return this.filteredDocuments;
-      return [...this.filteredDocuments].sort((a, b) => {
-        const comparison = a[this.sortKey].localeCompare(b[this.sortKey]);
-        return this.sortOrder === 'asc' ? comparison : -comparison;
-      });
-    },
   },
   methods: {
-    deleteDocument(document) {
-      if (confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
-        this.documents = this.documents.filter((item) => item.id !== document.id);
-        localStorage.setItem('documents', JSON.stringify(this.documents));
+    async fetchData() {
+      try {
+        const response = await axios.get("http://localhost:3001/directory");
+        this.documents = response.data;
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
     },
+
+    async deleteDocument(document) {
+      if (confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
+        try {
+          await axios.delete(`http://localhost:3001/directory/${document.id}`);
+          this.updateDocuments(this.documents.filter((item) => item.id !== document.id));
+          console.log('Document deleted successfully');
+        } catch (error) {
+          console.error('Error deleting document:', error);
+        }
+      }
+    },
+
     openEditModal(item) {
       this.originalDocument = { ...item };
       this.editingDocument = item;
     },
-    saveDocument() {
+
+    async saveDocument() {
       const index = this.documents.findIndex((doc) => doc.id === this.editingDocument.id);
       if (index !== -1) {
-        const updatedDocument = { ...this.editingDocument };
-        this.documents.splice(index, 1, updatedDocument);
-        localStorage.setItem('documents', JSON.stringify(this.documents));
-        this.editingDocument = null;
+        try {
+          const updatedDocument = { ...this.editingDocument };
+          await axios.put(`http://localhost:3001/directory/${updatedDocument.id}`, updatedDocument);
+          this.updateDocuments([
+            ...this.documents.slice(0, index),
+            updatedDocument,
+            ...this.documents.slice(index + 1),
+          ]);
+          this.editingDocument = null;
+          console.log('Document updated successfully');
+        } catch (error) {
+          console.error('Error updating document:', error);
+        }
       }
     },
+
     cancelEdit() {
       if (this.editingDocument) {
         Object.assign(this.editingDocument, this.originalDocument);
@@ -234,42 +222,94 @@ export default {
         this.originalDocument = null;
       }
     },
+
     isEditing(item) {
       return this.editingDocument && this.editingDocument.id === item.id;
     },
+
     changePage(page) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
       }
     },
+
     updatePageSize() {
       this.currentPage = 1;
     },
+
     goToPage() {
       if (this.gotoPage >= 1 && this.gotoPage <= this.totalPages) {
         this.currentPage = this.gotoPage;
       }
     },
+
+    showModal() {
+      this.resetNewDirectory();
+      this.isModalOpen = true;
+    },
+
+    handleCancel() {
+      this.isModalOpen = false;
+      this.resetNewDirectory();
+    },
+
+    // generateNewId() {
+    //   // Implement your ID generation logic here
+    //   return Math.random().toString(36).substr(2, 9);
+    // },
+    resetNewDirectory() {
+      this.newDirectory = {
+        directory_name: '',
+        note: ''
+      };
+    },
+    updateDocuments(newDocuments) {
+      this.documents = newDocuments;
+    },
+    async handleOk() {
+      const newDoc = {
+        id: this.generateNewId(),
+        directory_name: this.newDirectory.directory_name,
+        note: this.newDirectory.note,
+      };
+
+      try {
+        const response = await axios.post('http://localhost:3001/directory', newDoc);
+        console.log('Directory created:', response.data);
+
+        this.updateDocuments([...this.documents, response.data]);
+        this.isModalOpen = false;
+        this.resetNewDirectory();
+      } catch (error) {
+        console.error('Error creating directory:', error);
+      }
+    },
+
     toggleSearch(field) {
       this.searchField = this.searchField === field ? '' : field;
     },
+
     filterDocuments() {
       this.currentPage = 1;
     },
-    fetchData() {
-      // Fetch or load data (placeholder for axios or API call)
-      this.documents = JSON.parse(localStorage.getItem('documents')) || [];
+
+    updateDocuments(documents) {
+      this.documents = documents;
+      localStorage.setItem('documents', JSON.stringify(this.documents));
     },
-    showModal() {
-      this.isModalOpen = true;
+
+    generateNewId() {
+      // Generate new ID by finding the max ID and incrementing it
+      return this.documents.length > 0 ? Math.max(...this.documents.map(doc => doc.id)) + 1 : 1;
     },
-    handleOk() {
-      this.isModalOpen = false;
-    },
-    handleCancel() {
-      this.isModalOpen = false;
-    },
-  },
+
+    resetNewDirectory() {
+      this.newDirectory = {
+        directory_name: '',
+        note: ''
+      };
+    }
+  }
 };
 </script>
 

@@ -5,7 +5,7 @@ import Forgotpassword from "./components/phase01/Forgotpassword.vue";
 //Phase02
 import MasterPage from "./components/phase02/MasterPage.vue";
 //Phase03
-import UploadFile from "./components/Signature/UploadFile.vue";
+import UploadFile from "./components/signature/UploadFile.vue";
 import Step01 from "./components/signature/Step01.vue";
 import AddPerson from "./components/signature/Step02.vue";
 import Display from "./components/signature/Step03.vue";

@@ -53,19 +53,16 @@
                     :class="{ 'is-invalid': signerErrors[index]?.name }" placeholder="Nhập họ và tên">
                 </div>
                 <div class="col-auto">
-                  <label class="col-form-label">Email <span class="text-danger">*</span></label>
-                </div>
-                <div class="col-auto">
-                  <input type="email" v-model="signer.email" class="form-control"
-                    :class="{ 'is-invalid': signerErrors[index]?.email }" placeholder="Nhập email" required>
-                  <div v-if="showErrors">
-                    <div v-if="signerErrors[index].email === ''" class="error-message">
-                      Email không được để trống.
-                    </div>
-                    <div v-else-if="signerErrors[index].email" class="error-message">
-                      Vui lòng nhập đúng định dạng email.
-                    </div>
-                  </div>
+                  <a-form-item label="Email" name="email" :rules="[
+                    { required: true, message: 'Hãy nhập email người dùng!' },
+                    { type: 'email', message: 'Email không hợp lệ!' }
+                  ]">
+                    <a-input v-model:value="formState.email">
+                      <template #prefix>
+                        <UserOutlined class="site-form-item-icon" />
+                      </template>
+                    </a-input>
+                  </a-form-item>
                 </div>
                 <div class="col-auto">
                   <label class="col-form-label">Hình thức ký</label>
@@ -137,196 +134,212 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import {  reactive, ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 import Navbar from '../layout/Processing.vue';
 
-export default {
-  name: 'AddPerson',
-  components: {
-    Header,
-    Sidebar,
-    Navbar
-  },
-  data() {
-    return {
-      signers: [
-        { name: '', email: '', method: 'Ký số' },
-      ],
-      recipients: [{ name: '', email: '', method: 'Nhận bản sao' }],
-      signerErrors: [{}, {}],
-      recipientErrors: [{}],
-      contacts: [],
-      searchQuery: '',
-      entryType: '',
-      showModal: false,
-      autoCloseTimeout: null,
-      showErrors: false, // Controls error visibility
-    };
-  },
-  computed: {
-    filteredContacts() {
-      const query = this.searchQuery.toLowerCase();
-      return this.contacts.filter(contact =>
-        contact.name.toLowerCase().includes(query) || contact.email.toLowerCase().includes(query)
-      );
+const formState = reactive({
+  email: '',
+});
+const onFinish = values => {
+  console.log('Success:', values);
+};
+const onFinishFailed = errorInfo => {
+  console.log('Failed:', errorInfo);
+};
+const disabled = computed(() => {
+  return !(formState.username && formState.password);
+});
+// Reactive properties
+const signers = ref([
+  { name: '', email: '', method: 'Ký số' },
+  { name: '', email: '', method: 'Ký số' },
+]);
+const recipients = ref([{ name: '', email: '', method: 'Nhận bản sao' }]);
+const signerErrors = ref([{}, {}]);
+const recipientErrors = ref([{}]);
+const contacts = ref([]);
+const searchQuery = ref('');
+const entryType = ref('');
+const showModal = ref(false);
+const autoCloseTimeout = ref(null);
+const showErrors = ref(false); // Controls error visibility
+
+// Computed properties
+const filteredContacts = computed(() => {
+  const query = searchQuery.value.toLowerCase();
+  return contacts.value.filter(contact =>
+    contact.name.toLowerCase().includes(query) || contact.email.toLowerCase().includes(query)
+  );
+});
+
+// Lifecycle hooks
+onMounted(() => {
+  loadContacts();
+  loadSavedData();
+});
+
+// Methods
+const openModal = () => {
+  showModal.value = true;
+  autoCloseModal();
+  nextTick(() => {
+    const searchInput = document.getElementById('contactSearchInput');
+    if (searchInput) {
+      searchInput.focus();
     }
-  },
-  created() {
-    this.loadContacts();
-    this.loadSavedData();
-  },
-  methods: {
-    openModal() {
-      this.showModal = true;
-      this.autoCloseModal();
-      this.$nextTick(() => {
-        const searchInput = document.getElementById('contactSearchInput');
-        if (searchInput) {
-          searchInput.focus();
-        }
+  });
+};
+
+const closeModal = () => {
+  showModal.value = false;
+  if (autoCloseTimeout.value) {
+    clearTimeout(autoCloseTimeout.value);
+  }
+};
+
+const autoCloseModal = () => {
+  autoCloseTimeout.value = setTimeout(() => {
+    closeModal();
+  }, 5000); // Automatically close the modal after 5 seconds
+};
+
+const loadContacts = async () => {
+  try {
+    const response = await axios.get('http://localhost:3000/contacts');
+    contacts.value = response.data;
+  } catch (error) {
+    console.error('Error loading contacts:', error);
+  }
+};
+
+const addEntry = (type) => {
+  const entry = { name: '', email: '', method: type === 'signer' ? 'Ký số' : 'Nhận bản sao' };
+  if (type === 'signer') {
+    signers.value.push(entry);
+    signerErrors.value.push({});
+  } else if (type === 'recipient') {
+    recipients.value.push(entry);
+    recipientErrors.value.push({});
+  }
+  validateForm();
+};
+
+const confirmRemoveSigner = (index, type) => {
+  if (confirm('Bạn có chắc chắn muốn xóa người này không?')) {
+    if (type === 'signer') {
+      signers.value.splice(index, 1);
+      signerErrors.value.splice(index, 1);
+    } else if (type === 'recipient') {
+      recipients.value.splice(index, 1);
+      recipientErrors.value.splice(index, 1);
+    }
+  }
+};
+
+const selectContact = (contact) => {
+  if (entryType.value === 'signer') {
+    const emptySigner = signers.value.find(signer => !signer.name && !signer.email);
+    if (emptySigner) {
+      emptySigner.name = contact.name;
+      emptySigner.email = contact.email;
+    } else {
+      signers.value.push({
+        name: contact.name,
+        email: contact.email,
+        method: 'Ký số'
       });
-    },
-    closeModal() {
-      this.showModal = false;
-      if (this.autoCloseTimeout) {
-        clearTimeout(this.autoCloseTimeout);
-      }
-    },
-    autoCloseModal() {
-      this.autoCloseTimeout = setTimeout(() => {
-        this.closeModal();
-      }, 5000); // Automatically close the modal after 5 seconds
-    },
-    loadContacts() {
-      axios.get('/src/data/contacts.json')
-        .then(response => {
-          this.contacts = response.data;
-        })
-        .catch(error => {
-          console.error('Error loading contacts:', error);
-        });
-    },
-    addEntry(type) {
-      const entry = { name: '', email: '', method: type === 'signer' ? 'Ký số' : 'Nhận bản sao' };
-      if (type === 'signer') {
-        this.signers.push(entry);
-        this.signerErrors.push({});
-      } else if (type === 'recipient') {
-        this.recipients.push(entry);
-        this.recipientErrors.push({});
-      }
-      this.validateForm();
-    },
-    confirmRemoveSigner(index, type) {
-      if (confirm('Bạn có chắc chắn muốn xóa người này không?')) {
-        if (type === 'signer') {
-          this.signers.splice(index, 1);
-          this.signerErrors.splice(index, 1);
-        } else if (type === 'recipient') {
-          this.recipients.splice(index, 1);
-          this.recipientErrors.splice(index, 1);
-        }
-      }
-    },
-    selectContact(contact) {
-      if (this.entryType === 'signer') {
-        const emptySigner = this.signers.find(signer => !signer.name && !signer.email);
-        if (emptySigner) {
-          emptySigner.name = contact.name;
-          emptySigner.email = contact.email;
-        } else {
-          this.signers.push({
-            name: contact.name,
-            email: contact.email,
-            method: 'Ký số'
-          });
-          this.signerErrors.push({});
-        }
-      } else if (this.entryType === 'recipient') {
-        const emptyRecipient = this.recipients.find(recipient => !recipient.name && !recipient.email);
-        if (emptyRecipient) {
-          emptyRecipient.name = contact.name;
-          emptyRecipient.email = contact.email;
-        } else {
-          this.recipients.push({
-            name: contact.name,
-            email: contact.email,
-            method: 'Nhận bản sao'
-          });
-          this.recipientErrors.push({});
-        }
-      }
-      // Đóng modal sau khi chọn người
-      this.$nextTick(() => {
-        const modalElement = document.getElementById('contactModal');
-        if (modalElement) {
-          const modal = bootstrap.Modal.getInstance(modalElement);
-          if (modal) {
-            modal.hide();
-          }
-        }
+      signerErrors.value.push({});
+    }
+  } else if (entryType.value === 'recipient') {
+    const emptyRecipient = recipients.value.find(recipient => !recipient.name && !recipient.email);
+    if (emptyRecipient) {
+      emptyRecipient.name = contact.name;
+      emptyRecipient.email = contact.email;
+    } else {
+      recipients.value.push({
+        name: contact.name,
+        email: contact.email,
+        method: 'Nhận bản sao'
       });
-    },
-    setEntryType(type) {
-      this.entryType = type;
-    },
-    validateForm() {
-      const validateEntries = (entries, errors) => {
-        return entries.every((entry, index) => {
-          let isValid = true;
-          // Removed name validation
-          if (!entry.email || !this.isValidEmail(entry.email)) {
-            errors[index].email = true;
-            isValid = false;
-          } else {
-            errors[index].email = false;
-          }
-          return isValid;
-        });
-      };
-      const signersValid = validateEntries(this.signers, this.signerErrors);
-      const recipientsValid = validateEntries(this.recipients, this.recipientErrors);
-
-      return signersValid && recipientsValid;
-    },
-    isValidEmail(email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(email);
-    },
-    handleBack() {
-      this.$router.push('/Chinh-sua-van-ban');
-    },
-    handleNext() {
-      this.showErrors = true; // Show errors if any
-      const isValid = this.validateForm();
-
-      if (isValid && this.signers.every(signer => signer.name && signer.email)) {
-        // Lưu thông tin người ký và người nhận vào localStorage
-        const data = {
-          signers: this.signers,
-          recipients: this.recipients,
-        };
-
-        // Chuyển đổi dữ liệu thành chuỗi JSON và lưu vào localStorage
-        localStorage.setItem('signersRecipientsData', JSON.stringify(data));
-
-        // Điều hướng đến trang tiếp theo sau khi lưu
-        this.$router.push('/Thiet-lap-vung-ky');
+      recipientErrors.value.push({});
+    }
+  }
+  // Đóng modal sau khi chọn người
+  nextTick(() => {
+    const modalElement = document.getElementById('contactModal');
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      if (modal) {
+        modal.hide();
       }
-    },
-    loadSavedData() {
-      const savedData = localStorage.getItem('signersRecipientsData');
+    }
+  });
+};
 
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
-        console.log("Signers and Recipients Data:", parsedData);
+const setEntryType = (type) => {
+  entryType.value = type;
+};
+
+const validateForm = () => {
+  const validateEntries = (entries, errors) => {
+    return entries.every((entry, index) => {
+      let isValid = true;
+      // Removed name validation
+      if (!entry.email || !isValidEmail(entry.email)) {
+        errors[index].email = true;
+        isValid = false;
       } else {
-        console.log("No data found in localStorage.");
+        errors[index].email = false;
       }
-    }
+      return isValid;
+    });
+  };
+  const signersValid = validateEntries(signers.value, signerErrors.value);
+  const recipientsValid = validateEntries(recipients.value, recipientErrors.value);
+
+  return signersValid && recipientsValid;
+};
+
+const isValidEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const handleBack = () => {
+  this.$router.push('/Chinh-sua-van-ban');
+};
+
+const handleNext = () => {
+  showErrors.value = true; // Show errors if any
+  const isValid = validateForm();
+
+  if (isValid && signers.value.every(signer => signer.name && signer.email)) {
+    // Lưu thông tin người ký và người nhận vào localStorage
+    const data = {
+      signers: signers.value,
+      recipients: recipients.value,
+    };
+
+    // Chuyển đổi dữ liệu thành chuỗi JSON và lưu vào localStorage
+    localStorage.setItem('signersRecipientsData', JSON.stringify(data));
+
+    // Điều hướng đến trang tiếp theo sau khi lưu
+    this.$router.push('/Thiet-lap-vung-ky');
+  }
+};
+
+const loadSavedData = () => {
+  const savedData = localStorage.getItem('signersRecipientsData');
+
+  if (savedData) {
+    const parsedData = JSON.parse(savedData);
+    console.log("Signers and Recipients Data:", parsedData);
+  } else {
+    console.log("No data found in localStorage.");
   }
 };
 </script>
