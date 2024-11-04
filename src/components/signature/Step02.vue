@@ -53,16 +53,14 @@
                     :class="{ 'is-invalid': signerErrors[index]?.name }" placeholder="Nhập họ và tên">
                 </div>
                 <div class="col-auto">
-                  <a-form-item label="Email" name="email" :rules="[
-                    { required: true, message: 'Hãy nhập email người dùng!' },
-                    { type: 'email', message: 'Email không hợp lệ!' }
-                  ]">
-                    <a-input v-model:value="formState.email">
-                      <template #prefix>
-                        <UserOutlined class="site-form-item-icon" />
-                      </template>
-                    </a-input>
-                  </a-form-item>
+                  <label class="col-form-label">Email <span class="text-danger">*</span></label>
+                </div>
+                <div class="col-auto">
+                  <input type="email" v-model="signer.email" class="form-control"
+                    :class="{ 'is-invalid': signerErrors[index]?.email }" placeholder="Nhập email" required>
+                  <div v-if="showErrors && signerErrors[index].email" class="error-message">
+                    Vui lòng nhập đúng định dạng email.
+                  </div>
                 </div>
                 <div class="col-auto">
                   <label class="col-form-label">Hình thức ký</label>
@@ -135,7 +133,7 @@
 </template>
 
 <script setup>
-import {  reactive, ref, computed, onMounted } from 'vue';
+import { reactive, ref, computed, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
@@ -153,6 +151,7 @@ const onFinishFailed = errorInfo => {
 const disabled = computed(() => {
   return !(formState.username && formState.password);
 });
+
 // Reactive properties
 const signers = ref([
   { name: '', email: '', method: 'Ký số' },
@@ -268,7 +267,6 @@ const selectContact = (contact) => {
       recipientErrors.value.push({});
     }
   }
-  // Đóng modal sau khi chọn người
   nextTick(() => {
     const modalElement = document.getElementById('contactModal');
     if (modalElement) {
@@ -288,12 +286,11 @@ const validateForm = () => {
   const validateEntries = (entries, errors) => {
     return entries.every((entry, index) => {
       let isValid = true;
-      // Removed name validation
       if (!entry.email || !isValidEmail(entry.email)) {
-        errors[index].email = true;
+        errors[index].email = 'Invalid email format';
         isValid = false;
       } else {
-        errors[index].email = false;
+        errors[index].email = '';
       }
       return isValid;
     });
@@ -318,16 +315,13 @@ const handleNext = () => {
   const isValid = validateForm();
 
   if (isValid && signers.value.every(signer => signer.name && signer.email)) {
-    // Lưu thông tin người ký và người nhận vào localStorage
     const data = {
       signers: signers.value,
       recipients: recipients.value,
     };
 
-    // Chuyển đổi dữ liệu thành chuỗi JSON và lưu vào localStorage
     localStorage.setItem('signersRecipientsData', JSON.stringify(data));
 
-    // Điều hướng đến trang tiếp theo sau khi lưu
     this.$router.push('/Thiet-lap-vung-ky');
   }
 };
@@ -343,6 +337,7 @@ const loadSavedData = () => {
   }
 };
 </script>
+
 
 <style scoped>
 @import '@/assets/AddPerson.css';

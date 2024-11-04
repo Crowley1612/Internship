@@ -10,6 +10,8 @@
 </template>
 
 <script>
+import axios from "axios"; // Import axios
+
 export default {
   name: "User",
   props: {
@@ -18,6 +20,11 @@ export default {
       default: () => [],
     },
   },
+  data() {
+    return {
+      sender: "Người gửi không xác định", // Khởi tạo giá trị mặc định cho sender
+    };
+  },
   computed: {
     greeting() {
       const hour = new Date().getHours();
@@ -25,14 +32,26 @@ export default {
       if (hour < 18) return "Chào buổi chiều,";
       return "Chào buổi tối,";
     },
-    sender() {
-      return this.documents.length > 1
-        ? this.documents[1].nguoiGui
-        : "Người gửi không xác định";
+  },
+  methods: {
+    async fetchUserData() {
+      try {
+        const response = await axios.get("http://localhost:3003/users");
+        // Lấy username từ response, giả định rằng response.data là mảng các user
+        if (response.data.length > 0) {
+          this.sender = response.data[0].username; // Gán username của user đầu tiên vào sender
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu người dùng:", error);
+      }
     },
+  },
+  mounted() {
+    this.fetchUserData(); // Gọi hàm fetchUserData khi component được gắn vào DOM
   },
 };
 </script>
+
 <style scoped>
 .user {
   margin-top: auto;

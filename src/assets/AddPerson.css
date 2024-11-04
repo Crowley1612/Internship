@@ -8,29 +8,40 @@
   flex-direction: column;
   justify-content: center;
   background-color: #f5f5f5; /* Light grey background for the container */
+  transition: all 0.3s ease;
 }
 
 /* Card Styling */
 .card {
   border: 1px solid #ced4da;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Light shadow for card depth */
-  overflow: hidden; /* Ensures proper rounding of corners */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Enhanced shadow for more depth */
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px); /* Lift effect on hover */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
 }
 
 /* Card Header */
 .card-header {
-  background-color: #e9ecef; /* Slightly darker background for card header */
+  background-color: #e9ecef;
   padding: 15px;
-  border-bottom: 1px solid #dee2e6; /* Subtle border */
-  border-radius: 0.5rem 0.5rem 0 0; /* Rounded corners at the top */
+  border-bottom: 1px solid #dee2e6;
+  border-radius: 0.5rem 0.5rem 0 0;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #495057;
 }
 
 /* Card Body */
 .card-body {
   padding: 15px;
-  background-color: #f0f8ff; /* Light AliceBlue background for card body */
-  border-radius: 0 0 0.5rem 0.5rem; /* Rounded corners at the bottom */
+  background-color: #f0f8ff;
+  border-radius: 0 0 0.5rem 0.5rem;
+  line-height: 1.6;
 }
 
 /* Avatar Image */
@@ -38,14 +49,16 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  object-fit: cover; /* Ensures the image covers the container */
-  border: 2px solid #007bff; /* Border color matching primary button */
-  transition: transform 0.3s ease; /* Smooth hover effect */
+  object-fit: cover;
+  border: 2px solid #007bff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .avatar-img:hover {
-  transform: scale(1.1); /* Slightly enlarges the avatar on hover */
+  transform: scale(1.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adds shadow on hover */
 }
+
 /* Modal */
 .modal {
   transition: opacity 0.3s ease;
@@ -54,69 +67,47 @@
 .modal-content {
   padding: 20px;
   border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* List Group Items */
 .list-group-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 10px 15px;
+  transition: background-color 0.2s ease;
 }
+
+.list-group-item:hover {
+  background-color: #f1f3f5;
+}
+
+/* Form Section */
 .form-section {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
-}
-
-.signer-entry,
-.recipient-entry {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   margin-bottom: 15px;
 }
 
-.form-navigation {
-  margin-top: 20px;
-}
-
-.btn {
-  border-radius: 20px;
-}
-.signer-entry, .recipient-entry {
-  transition: all 0.3s ease;
-}
-
-.signer-entry-enter-active, .signer-entry-leave-active {
-  opacity: 1;
-  max-height: 100px;
-}
-
-.signer-entry-enter, .signer-entry-leave-to {
-  opacity: 0;
-  max-height: 0;
-}
-.col-auto {
-  display: flex;
-  align-items: center;
-  height: auto;
-}
 /* Spacing for Margins and Padding */
 .mb-4, .mb-5 {
   margin-bottom: 1.5rem;
   padding: 15px;
   border-radius: 0.5rem;
-  background-color: #eaf4ff; /* Soft background color for sections */
-  border: 2px solid #007bff; /* Border color matching primary button */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
-}
-
-.mb-5 {
-  margin-bottom: 3rem;
+  background-color: #eaf4ff;
+  border: 2px solid #007bff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Buttons */
-.btn-primary, .btn-secondary {
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 0.5rem;
+.btn {
+  border-radius: 20px;
   padding: 10px 20px;
+  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s, border-color 0.3s, transform 0.3s;
   border: none;
@@ -130,8 +121,8 @@
 }
 
 .btn-primary:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-  transform: translateY(-2px); /* Adds a slight lift effect on hover */
+  background-color: #0056b3;
+  transform: translateY(-2px);
 }
 
 .btn-secondary {
@@ -140,27 +131,29 @@
 }
 
 .btn-secondary:hover {
-  background-color: #5a6268; /* Darker grey on hover */
-  transform: translateY(-2px); /* Adds a slight lift effect on hover */
+  background-color: #5a6268;
+  transform: translateY(-2px);
 }
+
 .btn-danger {
   background-color: #dc3545;
   color: #ffffff;
   width: fit-content;
 }
+
 /* Sidebar */
 .sidebar {
   width: 250px;
   background-color: #f8f9fa;
   padding: 1rem;
   height: 100vh;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Error and Validation */
 .invalid-feedback {
   display: block;
-  color: #dc3545; /* Bootstrap's default error color */
+  color: #dc3545;
 }
 
 .error-message {
@@ -172,11 +165,6 @@
 
 .is-invalid {
   border-color: #dc3545;
-}
-
-/* Container Fluid */
-.container-fluid {
-  padding-left: 0;
 }
 
 /* Responsive Adjustments */
@@ -195,5 +183,19 @@
     width: 100%;
     height: auto;
     box-shadow: none;
+  }
+
+  .card {
+    padding: 10px;
+  }
+
+  .list-group-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .avatar-img {
+    width: 40px;
+    height: 40px;
   }
 }

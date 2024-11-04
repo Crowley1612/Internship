@@ -39,101 +39,110 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import { ref, reactive } from 'vue';
-import removeAccents from 'remove-accents';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 
-export default {
-    components: {
-        Sidebar,
-        Header,
-    },
-    setup() {
-        const router = useRouter();
-        const uploadProgress = ref(0);
-        const uploadedFiles = reactive([]);
+// Router for navigation
+const router = useRouter();
 
-        const fileInput = ref(null);
+// Reactive variables
+const uploadProgress = ref(0);
+const uploadedFiles = reactive([]);
+const fileInput = ref(null);
 
-        const handleFileSelect = (e) => {
-            handleFiles(e.target.files);
-        };
-
-        const handleFiles = (files) => {
-            if (uploadedFiles.length > 0) {
-                alert('Bạn chỉ được tải lên 1 file duy nhất.');
-                return;
-            }
-
-            Array.from(files).forEach(file => {
-                if (file.size > 4 * 1024 * 1024) {
-                    alert(`File ${file.name} vượt quá kích thước cho phép (4MB)`);
-                } else {
-                    uploadFile(file);
-                }
-            });
-        };
-
-        const uploadFile = async (file) => {
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const response = await axios.post('http://localhost:5000/upload', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                    responseType: 'blob',
-                    onUploadProgress: (progressEvent) => {
-                        if (progressEvent.lengthComputable) {
-                            uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        }
-                    },
-                });
-
-                const originalFilename = file.name.replace(/\.[^/.]+$/, "");
-                const convertedFile = new File([response.data], `${originalFilename}.pdf`, { type: 'application/pdf' });
-
-                uploadedFiles.push(convertedFile);
-
-                const fileObject = {
-                    name: convertedFile.name,
-                    url: URL.createObjectURL(convertedFile),
-                };
-
-                localStorage.setItem('pdfFiles', JSON.stringify([fileObject]));
-
-                router.push({
-                    name: 'EditFile',
-                    params: {
-                        fileName: convertedFile.name,
-                        fileUrl: fileObject.url,
-                    },
-                });
-
-                // Clean up after file is no longer needed
-                URL.revokeObjectURL(fileObject.url);
-            } catch (error) {
-                console.error('Error uploading file:', error);
-            }
-        };
-
-        const triggerFileSelect = () => {
-            fileInput.value.click();
-        };
-
-        return {
-            uploadProgress,
-            uploadedFiles,
-            fileInput,
-            handleFileSelect,
-            triggerFileSelect,
-            handleDrop: (e) => handleFiles(e.dataTransfer.files),
-        };
-    },
+// Handle file selection
+const handleFileSelect = (e) => {
+    processFiles(e.target.files);
 };
+
+// Process files (validation and uploading)
+const processFiles = (files) => {
+    const validFiles = Array.from(files).filter((file) => {
+        if (file.size > 4 * 1024 * 1024) {
+            alert(`File ${file.name} vượt quá kích thước cho phép (4MB)`);
+            return false;
+        }
+        return true;
+    });
+
+    if (validFiles.length === 0 || uploadedFiles.length > 0) {
+        alert('Bạn chỉ được tải lên 1 file duy nhất.');
+        return;
+    }
+
+    uploadFile(validFiles[0]);
+};
+
+// Upload file function
+const uploadFile = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await axios.post('http://localhost:5000/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            responseType: 'blob',
+            onUploadProgress: handleProgress,
+        });
+
+        const convertedFile = convertToPDF(file, response.data);
+        handleUploadSuccess(convertedFile);
+    } catch (error) {
+        console.error('Error uploading file:', error);
+        alert('Upload thất bại, vui lòng thử lại.');
+    }
+};
+
+// Handle upload progress
+const handleProgress = (progressEvent) => {
+    if (progressEvent.lengthComputable) {
+        uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+    }
+};
+
+// Convert uploaded file to PDF format
+const convertToPDF = (file, data) => {
+    const originalFilename = file.name.replace(/\.[^/.]+$/, "");
+    return new File([data], `${originalFilename}.pdf`, { type: 'application/pdf' });
+};
+
+// Handle successful file upload
+const handleUploadSuccess = (file) => {
+    uploadedFiles.push(file);
+
+    const fileObject = {
+        name: file.name,
+        url: URL.createObjectURL(file),
+    };
+
+    localStorage.setItem('pdfFiles', JSON.stringify([fileObject]));
+
+    // Navigate to the edit page
+    router.push({
+        name: 'EditFile',
+        params: {
+            fileName: file.name,
+            fileUrl: fileObject.url,
+        },
+    });
+
+    URL.revokeObjectURL(fileObject.url);
+};
+
+// Trigger file input click
+const triggerFileSelect = () => {
+    fileInput.value.click();
+};
+
+// Handle file drop
+const handleDrop = (e) => {
+    processFiles(e.dataTransfer.files);
+};
+
 </script>
 
 

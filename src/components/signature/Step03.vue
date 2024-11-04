@@ -27,8 +27,9 @@
 
           <!-- Middle Column: PDF Viewer and Signature Drawing -->
           <div class="col-md-6 middle-column">
-            <div class="pdf-container" ref="containerRef" @mousedown="startDrawing(null, $event)" @mousemove="draw" @mouseup="endDrawing">
-              <canvas v-for="page in pages" :key="page.num" :ref="'canvas-' + page.num"
+            <div class="pdf-container" ref="containerRef" @mousedown="startDrawing(null, $event)" @mousemove="draw"
+              @mouseup="endDrawing">
+              <canvas v-for="page in pages" :key="page.num" :ref="'canvas' + page.num"
                 @mousedown="startDrawing(page.num, $event)" @mousemove="draw" @mouseup="endDrawing"></canvas>
               <!-- Signature Areas -->
               <div v-for="(area, index) in signatureAreas" :key="index"
@@ -210,7 +211,7 @@ const draw = (event) => {
   if (!isDrawing.value) return;
 
   const rect = event.target.getBoundingClientRect();
-  const currentX = event.clientX ;
+  const currentX = event.clientX;
   const currentY = event.clientY;
 
   drawingArea.value = {
@@ -262,24 +263,36 @@ const updateSignatureArea = (area) => {
 };
 </script>
 
+
 <style scoped>
 @import '@/assets/Display.css';
-.pdf-container {
-  position: relative;
-  overflow: hidden;
-  width: fit-content;
-  height: fit-content;
+
+.container-fluid {
+  height: 100%;
+}
+
+.left-column,
+.middle-column,
+.right-column {
+  height: 100%;
+}
+
+.controls {
+  padding: 10px;
 }
 
 .signature-area {
+  border: 1px dashed #00f;
   position: absolute;
-  border: 2px dashed #007bff;
-  background: rgba(0, 123, 255, 0.1);
 }
 
 .drawing-area {
   position: absolute;
-  border: 2px solid #28a745;
-  background: rgba(40, 167, 69, 0.2);
+  border: 2px dashed red;
+}
+
+.file-list {
+  padding: 0;
+  list-style: none;
 }
 </style>

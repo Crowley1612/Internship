@@ -211,7 +211,8 @@ C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
+import axios from 'axios';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 
@@ -223,12 +224,12 @@ const settings = reactive({
 });
 
 const user = reactive({
-    email: 'user@example.com',
-    username: 'user@example.com',
-    name: 'Nguyen Van A',
-    phone: '0123456789',
-    taxcode: '1234567890',
-    company: 'Công ty TNHH ABC'
+  email: '',
+  username: '',
+  name: '',
+  phone: '',
+  taxcode: '',
+  company: ''
 });
 
 const formState = reactive({
@@ -236,7 +237,22 @@ const formState = reactive({
     pass: '',
     checkPass: ''
 });
+const loadUserInfo = async () => {
+  try {
+    const response = await axios.get('http://localhost:3003/users');
+    const userData = response.data[0]; // Assuming you want the first user in the array
 
+    // Populate the user reactive object with the fetched data
+    user.email = userData.email;
+    user.username = userData.username;
+    user.name = userData.name;
+    user.phone = userData.tel;
+    user.taxcode = userData.tax;
+    user.company = userData.org;
+  } catch (error) {
+    console.error('Error loading user information:', error);
+  }
+};
 // Define ref for the form
 const formRef = ref(null);
 
@@ -338,6 +354,9 @@ async function handleOk() {
 function handleCancelModal() {
     isModalOpen.value = false;
 }
+onMounted(() => {
+    loadUserInfo();
+});
 </script>
 
 

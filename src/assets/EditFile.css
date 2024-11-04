@@ -2,6 +2,10 @@
 .container {
   width: 100%;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background-color: #f3f6f9; /* Lightened background for contrast */
 }
 
 .row {
@@ -10,19 +14,26 @@
 
 .col-md-10 {
   padding: 20px;
-  background-color: #f9f9f9; /* Light background for better contrast */
+  background-color: #fdfdfd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
 }
 
 /* Headers and Sections */
 .header {
-  margin-bottom: 20px;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #007bff; /* Accent color for headers */
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0056b3; /* Richer accent color for headers */
+  margin-bottom: 25px;
+  text-align: center;
 }
 
 .section {
-  margin-bottom: 30px; /* Add space between sections */
+  margin-bottom: 30px;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Soft shadow */
 }
 
 /* File List */
@@ -31,11 +42,16 @@
 }
 
 .file-item {
-  padding: 10px 0;
-  border-bottom: 1px solid #ced4da;
+  padding: 12px 0;
+  border-bottom: 1px solid #dde2e5;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: background-color 0.3s ease; /* Hover effect */
+}
+
+.file-item:hover {
+  background-color: #f1f3f5;
 }
 
 .file-info {
@@ -43,114 +59,131 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 80%; /* Ensure delete button remains visible */
+  max-width: 75%;
 }
 
 .delete-btn {
-  color: #ff4d4f; /* More vibrant delete color */
+  color: #f44336; /* Red delete button */
+  cursor: pointer;
 }
 
 .delete-btn:hover {
-  color: #d9363e; /* Darker hover color for delete button */
+  color: #d32f2f;
+  transform: scale(1.1); /* Slight scale on hover */
 }
 
 /* Form Elements */
 .form-label {
   font-weight: bold;
+  font-size: 1.1rem;
   color: #333;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .form-select,
 .form-control {
-  border-radius: 5px;
+  border-radius: 8px;
   padding: 10px;
   font-size: 1rem;
 }
 
 /* Required Field Indicator */
 .required {
-  color: #e74c3c;
+  color: #e53935;
   margin-right: 5px;
 }
 
 /* Custom Select Dropdown */
 .form-select {
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+.form-select-wrapper {
   position: relative;
-  padding-right: 2rem; /* Add space for arrow */
+  width: 100%;
 }
 
 .form-select::after {
   content: "\25BC"; /* Down arrow */
-  font-size: 1rem;
   position: absolute;
   right: 1rem;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: #495057;
+  color: #888;
 }
+
 /* Buttons */
 .btn {
   font-size: 1rem;
   font-weight: 600;
   padding: 10px 20px;
   border-radius: 8px;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for buttons */
 }
 
 .btn-primary {
   background-color: #007bff;
-  border-color: #007bff;
   color: #fff;
 }
 
 .btn-primary:hover {
-  background-color: #0056b3;
+  background-color: #0069d9;
+  transform: translateY(-2px);
 }
 
 .btn-secondary {
   background-color: #6c757d;
-  border-color: #6c757d;
+  color: #fff;
 }
 
 .btn-secondary:hover {
   background-color: #5a6268;
+  transform: translateY(-2px);
 }
 
-.btn:focus {
-  box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5); /* Focus state */
+.btn-danger {
+  background-color: #dc3545;
+  color: #fff;
 }
+
+.btn-danger:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+}
+
 /* Folder and Category Selection */
-.new-folder-input input,
-.new-category-input input {
-  border: 1px solid #ced4da;
-  border-radius: 5px;
-  padding: 0.5rem;
-}
-
 .new-folder-input,
 .new-category-input {
   display: flex;
   align-items: center;
-  margin-top: 10px;
+  gap: 0.5rem;
+}
+
+.new-folder-input input,
+.new-category-input input {
+  border-radius: 5px;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
 }
 
 .new-folder-input input:focus,
 .new-category-input input:focus {
   border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25); /* Add a slight shadow for focus */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
 }
 
 .new-folder-input button,
 .new-category-input button {
-  margin-left: 10px;
   padding: 0.5rem 1rem;
-  background-color: #28a745; /* Green button for adding */
+  background-color: #28a745;
   color: #fff;
   border: none;
   border-radius: 5px;
-  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .new-folder-input button:hover,
@@ -158,28 +191,6 @@
   background-color: #218838;
 }
 
-/* Custom Select Styling */
-.form-select-wrapper {
-  position: relative;
-  display: inline-block;
-  width: 100%;
-}
-
-.form-select {
-  appearance: none;
-  padding-right: 40px; /* Add space for custom arrow */
-}
-
-.form-select::after {
-  content: "\25BC"; /* Arrow */
-  font-size: 1rem;
-  position: absolute;
-  top: 50%;
-  right: 15px;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: #495057;
-}
 /* Responsive Layout */
 @media (max-width: 768px) {
   .col-md-10 {
@@ -187,13 +198,13 @@
   }
 
   .file-info {
-    max-width: 70%; /* Reduce width on smaller screens */
+    max-width: 70%;
   }
 
   .form-control,
   .form-select {
     font-size: 0.875rem;
-    padding: 0.4rem 0.6rem;
+    padding: 0.5rem;
   }
 
   .btn {
@@ -202,19 +213,22 @@
   }
 
   .header {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+  }
+
+  .section {
+    padding: 15px;
   }
 }
+
 /* Text Styling */
 .header {
-  font-size: 1.75rem;
-  font-weight: 600;
   color: #007bff;
+  text-align: center;
 }
 
 .form-label {
-  font-size: 1.125rem;
-  font-weight: bold;
+  font-size: 1rem;
   color: #343a40;
 }
 
@@ -228,9 +242,10 @@
 }
 
 .delete-btn {
-  color: #ff4d4f;
+  color: #f44336;
 }
 
 .delete-btn:hover {
-  color: #d9363e;
+  color: #d32f2f;
+  transform: scale(1.1);
 }

@@ -77,239 +77,121 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios'; // Make sure to import axios
-import Processing from '../layout/Processing.vue';
+import axios from 'axios'; 
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
-
+import NavBar from '../layout/Processing.vue';
+// Constants for file size units
 const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB'];
 
-export default {
-  name: 'EditFile',
-  components: {
-    Header,
-    Sidebar,
-    NavBar: Processing,
-  },
-  setup() {
-    const uploadedFiles = reactive([]);
-    const pdfFiles = ref([]);
-    const categories = ref([]);
-    const selectedCategory = ref('');
-    const newCategory = ref('');
-    const folders = ref([]);
-    const selectedFolder = ref('');
-    const newFolder = ref('');
-    const router = useRouter();
+// Reactive states and refs
+const uploadedFiles = reactive([]); 
+const pdfFiles = ref([]); // Stores uploaded PDF files
+const categories = ref([]); // Stores available categories
+const selectedCategory = ref(''); // Holds the selected category
+const newCategory = ref(''); // For adding new categories
+const folders = ref([]); // Stores folder options
+const selectedFolder = ref(''); // Holds the selected folder
+const newFolder = ref(''); // For adding new folders
 
-    const formatFileSize = (size) => {
-      let index = 0;
-      while (size >= 1024 && index < FILE_SIZE_UNITS.length - 1) {
-        size /= 1024;
-        index++;
-      }
-      return `${size.toFixed(1)} ${FILE_SIZE_UNITS[index]}`;
-    };
+const router = useRouter(); // Vue router
 
-    const confirmDelete = (file) => {
-      if (confirm(`Bạn có chắc chắn muốn xóa file ${file.name}?`)) {
-        pdfFiles.value = pdfFiles.value.filter((f) => f !== file);
-        localStorage.setItem('pdfFiles', JSON.stringify(pdfFiles.value));
-      }
-    };
-
-    const formatFolderName = () => {
-      newFolder.value = newFolder.value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-    };
-
-    const addFolder = () => {
-      if (newFolder.value) {
-        folders.value.push(newFolder.value);
-        selectedFolder.value = newFolder.value;
-        newFolder.value = '';
-      } else {
-        alert('Vui lòng nhập tên thư mục.');
-      }
-    };
-
-    const addCategory = () => {
-      if (newCategory.value) {
-        categories.value.push({ id: Date.now(), directory_name: newCategory.value });
-        selectedCategory.value = newCategory.value;
-        newCategory.value = '';
-      } else {
-        alert('Vui lòng nhập tên danh mục.');
-      }
-    };
-
-    const validateForm = () => {
-      if (!selectedCategory.value) {
-        alert('Vui lòng chọn danh mục tài liệu.');
-        return false;
-      }
-      if (!selectedFolder.value) {
-        alert('Vui lòng chọn thư mục lưu trữ.');
-        return false;
-      }
-      return true;
-    };
-
-    const handleNext = () => {
-      if (validateForm()) {
-        router.push('/Them-nguoi');
-      }
-    };
-
-    const handleBack = () => {
-      router.push('/Upload-File');
-    };
-
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/directory");
-        categories.value = response.data; // Correctly assigning fetched data to categories
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    onMounted(() => {
-      const files = localStorage.getItem('pdfFiles');
-      if (files) {
-        pdfFiles.value = JSON.parse(files);
-      }
-      fetchCategories();
-    });
-
-    return {
-      uploadedFiles,
-      pdfFiles,
-      categories,
-      selectedCategory,
-      newCategory,
-      folders,
-      selectedFolder,
-      newFolder,
-      formatFileSize,
-      confirmDelete,
-      formatFolderName,
-      addFolder,
-      addCategory,
-      validateForm,
-      handleNext,
-      handleBack,
-    };
-  },
+// Helper function to format file sizes
+const formatFileSize = (size) => {
+  let index = 0;
+  while (size >= 1024 && index < FILE_SIZE_UNITS.length - 1) {
+    size /= 1024;
+    index++;
+  }
+  return `${size.toFixed(1)} ${FILE_SIZE_UNITS[index]}`;
 };
+
+// Confirmation for file deletion
+const confirmDelete = (file) => {
+  if (confirm(`Bạn có chắc chắn muốn xóa file ${file.name}?`)) {
+    pdfFiles.value = pdfFiles.value.filter((f) => f !== file);
+    localStorage.setItem('pdfFiles', JSON.stringify(pdfFiles.value));
+  }
+};
+
+// Format folder name by removing accents and spaces
+const formatFolderName = () => {
+  newFolder.value = newFolder.value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+    .replace(/\s+/g, ''); // Remove spaces
+};
+
+// Add a new folder to the folder list
+const addFolder = () => {
+  if (newFolder.value) {
+    folders.value.push(newFolder.value);
+    selectedFolder.value = newFolder.value;
+    newFolder.value = ''; // Reset folder input
+  } else {
+    alert('Vui lòng nhập tên thư mục.');
+  }
+};
+
+// Add a new category to the category list
+const addCategory = () => {
+  if (newCategory.value) {
+    categories.value.push({ id: Date.now(), directory_name: newCategory.value });
+    selectedCategory.value = newCategory.value;
+    newCategory.value = ''; // Reset category input
+  } else {
+    alert('Vui lòng nhập tên danh mục.');
+  }
+};
+
+// Form validation for category and folder selection
+const validateForm = () => {
+  if (!selectedCategory.value) {
+    alert('Vui lòng chọn danh mục tài liệu.');
+    return false;
+  }
+  if (!selectedFolder.value) {
+    alert('Vui lòng chọn thư mục lưu trữ.');
+    return false;
+  }
+  return true;
+};
+
+// Handle 'Next' button click
+const handleNext = () => {
+  if (validateForm()) {
+    router.push('/Them-nguoi');
+  }
+};
+
+// Handle 'Back' button click
+const handleBack = () => {
+  router.push('/Upload-File');
+};
+
+// Fetch categories from the server
+const fetchCategories = async () => {
+  try {
+    const response = await axios.get("http://localhost:3001/directory");
+    categories.value = response.data;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+  }
+};
+
+// Lifecycle hook for fetching files and categories
+onMounted(() => {
+  const files = localStorage.getItem('pdfFiles');
+  if (files) {
+    pdfFiles.value = JSON.parse(files);
+  }
+  fetchCategories();
+});
 </script>
 
-
-
 <style scoped>
-.container-fluid {
-  padding: 0;
-  height: 100vh;
-}
-
-.row {
-  height: 100%;
-}
-
-.col-md-10 {
-  background-color: #f8f9fa;
-  overflow-y: auto;
-}
-
-.header {
-  font-weight: 600;
-  margin-bottom: 20px;
-}
-
-.file-name ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.file-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.file-info {
-  font-size: 16px;
-  color: #495057;
-}
-
-.delete-btn {
-  background-color: transparent;
-  border: none;
-  color: #dc3545;
-  cursor: pointer;
-  width: 100px;
-  margin-bottom: 0px;
-}
-
-.delete-btn:hover {
-  color: #ff5c5c;
-}
-
-.required {
-  color: #dc3545;
-  margin-right: 4px;
-}
-
-.form-select {
-  width: auto;
-  flex-grow: 1;
-}
-
-.custom-select-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.new-folder-input input {
-  margin-bottom: 8px;
-}
-
-.new-folder-input button {
-  width: 100%;
-}
-
-.d-grid {
-  padding-bottom: 20px;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  border-color: #6c757d;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
-  margin-bottom: 0px;
-  height: fit-content;
-}
-
-.btn-primary:hover,
-.btn-secondary:hover {
-  opacity: 0.85;
-}
-
-.mt-4 {
-  margin-top: 1.5rem !important;
-}
-
-.me-md-2 {
-  margin-right: 0.5rem !important;
-}
+@import '@/assets/EditFile.css';
 </style>
