@@ -2,7 +2,7 @@
   <div class="container-fluid h-100">
     <div class="row h-100">
       <Sidebar />
-      <div class="col-md-10 p-4">
+      <main class="col-md-10 p-4">
         <Header />
         <Navbar />
 
@@ -17,12 +17,13 @@
               <div class="modal-body">
                 <div class="mb-3">
                   <input type="text" v-model="searchQuery" class="form-control"
-                    placeholder="Tìm kiếm theo tên hoặc email" />
+                    placeholder="Tìm kiếm theo tên hoặc email" id="contactSearchInput"
+                    aria-label="Tìm kiếm theo tên hoặc email" />
                 </div>
                 <ul class="list-group">
                   <li v-for="contact in filteredContacts" :key="contact.email"
                     class="list-group-item list-group-item-action d-flex align-items-center"
-                    @click="selectContact(contact)">
+                    @click="selectContact(contact)" role="button" aria-label="Chọn {{ contact.name }}">
                     <img :src="contact.avatar" alt="Avatar" class="avatar-img me-3" />
                     <div>
                       <div>{{ contact.customer_name }}</div>
@@ -36,37 +37,46 @@
         </div>
 
         <!-- Add Signers Section -->
-        <div class="mb-5">
+        <section class="mb-5">
           <h3 class="mb-4">Thêm người ký</h3>
           <div v-for="(signer, index) in signers" :key="index" class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
               <span class="fw-bold">Người ký {{ index + 1 }}</span>
-              <button class="btn btn-danger btn-sm" @click="confirmRemoveSigner(index, 'signer')">🗑️</button>
+              <button class="btn btn-danger btn-sm" @click="confirmRemoveSigner(index, 'signer')"
+                aria-label="Xóa người ký {{ index + 1 }}">
+                🗑️
+              </button>
             </div>
             <div class="card-body">
               <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                  <label class="col-form-label">Họ và tên</label>
+                  <label for="signer-name-{{ index }}" class="col-form-label">Họ và tên</label>
                 </div>
                 <div class="col-auto">
-                  <input type="text" v-model="signer.name" class="form-control"
-                    :class="{ 'is-invalid': signerErrors[index]?.name }" placeholder="Nhập họ và tên">
+                  <input type="text" v-model="signer.name" :id="'signer-name-' + index" class="form-control"
+                    :class="{ 'is-invalid': signerErrors[index]?.name }" placeholder="Nhập họ và tên"
+                    aria-label="Họ và tên" />
                 </div>
                 <div class="col-auto">
-                  <label class="col-form-label">Email <span class="text-danger">*</span></label>
+                  <label for="signer-email-{{ index }}" class="col-form-label">
+                    Email <span class="text-danger">*</span>
+                  </label>
                 </div>
                 <div class="col-auto">
-                  <input type="email" v-model="signer.email" class="form-control"
-                    :class="{ 'is-invalid': signerErrors[index]?.email }" placeholder="Nhập email" required>
-                  <div v-if="showErrors && signerErrors[index].email" class="error-message">
-                    Vui lòng nhập đúng định dạng email.
+                  <input type="email" v-model="signer.email" :id="'signer-email-' + index" class="form-control"
+                    :class="{ 'is-invalid': signerErrors[index]?.email }" placeholder="Nhập email" required
+                    aria-label="Email" />
+                </div>
+                <div class="col-auto">
+                  <div v-if="signerErrors[index]?.email" class="invalid-feedback">
+                    {{ signerErrors[index].email }}
                   </div>
                 </div>
                 <div class="col-auto">
                   <label class="col-form-label">Hình thức ký</label>
                 </div>
                 <div class="col-auto">
-                  <select v-model="signer.method" class="form-select">
+                  <select v-model="signer.method" class="form-select" aria-label="Hình thức ký">
                     <option>Ký số</option>
                     <option>Phê duyệt ký điện tử</option>
                   </select>
@@ -74,60 +84,85 @@
               </div>
             </div>
           </div>
-          <button class="btn btn-primary" @click="addEntry('signer')">+ Thêm người ký</button>
-          <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#contactModal"
-            @click="setEntryType('signer')">Chọn từ danh bạ</button>
-        </div>
+          <div class="mt-3">
+            <button class="btn btn-primary me-2" @click="addEntry('signer')">
+              + Thêm người ký
+            </button>
+            <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#contactModal"
+              @click="setEntryType('signer')" aria-label="Chọn người ký từ danh bạ">
+              Chọn từ danh bạ
+            </button>
+          </div>
+        </section>
 
         <!-- Add Recipients Section -->
-        <div class="mb-5">
+        <section class="mb-5">
           <h3 class="mb-4">Thêm người nhận bản sao</h3>
           <div v-for="(recipient, index) in recipients" :key="index" class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
               <span class="fw-bold">Người nhận {{ index + 1 }}</span>
-              <button class="btn btn-danger btn-sm" @click="confirmRemoveSigner(index, 'recipient')">🗑️</button>
+              <button class="btn btn-danger btn-sm" @click="confirmRemoveSigner(index, 'recipient')"
+                aria-label="Xóa người nhận {{ index + 1 }}">
+                🗑️
+              </button>
             </div>
             <div class="card-body">
               <div class="row g-3 align-items-center">
                 <div class="col-auto">
-                  <label class="col-form-label">Họ và tên</label>
+                  <label for="recipient-name-{{ index }}" class="col-form-label">Họ và tên</label>
                 </div>
                 <div class="col-auto">
-                  <input type="text" v-model="recipient.name" class="form-control"
-                    :class="{ 'is-invalid': recipientErrors[index]?.name }" placeholder="Nhập họ và tên">
+                  <input type="text" v-model="recipient.name" :id="'recipient-name-' + index" class="form-control"
+                    :class="{ 'is-invalid': recipientErrors[index]?.name }" placeholder="Nhập họ và tên"
+                    aria-label="Họ và tên" />
                 </div>
                 <div class="col-auto">
-                  <label class="col-form-label">Email <span class="text-danger">*</span></label>
+                  <label for="recipient-email-{{ index }}" class="col-form-label">
+                    Email <span class="text-danger">*</span>
+                  </label>
                 </div>
                 <div class="col-auto">
-                  <input type="email" v-model="recipient.email" class="form-control"
-                    :class="{ 'is-invalid': recipientErrors[index]?.email }" placeholder="Nhập email" required>
-                  <div v-if="showErrors && recipientErrors[index].email" class="error-message">
-                    Vui lòng nhập đúng định dạng email.
+                  <input type="email" v-model="recipient.email" :id="'recipient-email-' + index" class="form-control"
+                    :class="{ 'is-invalid': recipientErrors[index]?.email }" placeholder="Nhập email" required
+                    aria-label="Email" />
+                </div>
+                <div class="col-auto">
+                  <div v-if="recipientErrors[index]?.email" class="invalid-feedback">
+                    {{ recipientErrors[index].email }}
                   </div>
                 </div>
                 <div class="col-auto">
-                  <label class="col-form-label">Hình thức ký</label>
+                  <label class="col-form-label">Hình thức nhận</label>
                 </div>
                 <div class="col-auto">
-                  <select v-model="recipient.method" class="form-select" disabled>
+                  <select v-model="recipient.method" class="form-select" disabled aria-label="Hình thức nhận">
                     <option>Nhận bản sao</option>
                   </select>
                 </div>
               </div>
             </div>
           </div>
-          <button class="btn btn-primary" @click="addEntry('recipient')">+ Thêm người nhận bản sao</button>
-          <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#contactModal"
-            @click="setEntryType('recipient')">Chọn từ danh bạ</button>
-        </div>
+          <div class="mt-3">
+            <button class="btn btn-primary me-2" @click="addEntry('recipient')">
+              + Thêm người nhận bản sao
+            </button>
+            <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#contactModal"
+              @click="setEntryType('recipient')" aria-label="Chọn người nhận từ danh bạ">
+              Chọn từ danh bạ
+            </button>
+          </div>
+        </section>
 
         <!-- Navigation Buttons -->
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-          <button class="btn btn-secondary me-md-2" type="button" @click="handleBack">Quay lại</button>
-          <button class="btn btn-primary" type="button" @click="handleNext">Tiếp tục</button>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+          <button class="btn btn-secondary me-md-2" type="button" @click="handleBack">
+            Quay lại
+          </button>
+          <button class="btn btn-primary" type="button" @click="handleNext">
+            Tiếp tục
+          </button>
         </div>
-      </div>
+      </main>
     </div>
   </div>
 </template>
@@ -138,21 +173,10 @@ import axios from 'axios';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 import Navbar from '../layout/Processing.vue';
+import { useRouter } from 'vue-router';
 
-const formState = reactive({
-  email: '',
-});
-const onFinish = values => {
-  console.log('Success:', values);
-};
-const onFinishFailed = errorInfo => {
-  console.log('Failed:', errorInfo);
-};
-const disabled = computed(() => {
-  return !(formState.username && formState.password);
-});
+const router = useRouter();
 
-// Reactive properties
 const signers = ref([
   { name: '', email: '', method: 'Ký số' },
   { name: '', email: '', method: 'Ký số' },
@@ -165,9 +189,8 @@ const searchQuery = ref('');
 const entryType = ref('');
 const showModal = ref(false);
 const autoCloseTimeout = ref(null);
-const showErrors = ref(false); // Controls error visibility
+const showErrors = ref(false);
 
-// Computed properties
 const filteredContacts = computed(() => {
   const query = searchQuery.value.toLowerCase();
   return contacts.value.filter(contact =>
@@ -175,13 +198,11 @@ const filteredContacts = computed(() => {
   );
 });
 
-// Lifecycle hooks
 onMounted(() => {
   loadContacts();
   loadSavedData();
 });
 
-// Methods
 const openModal = () => {
   showModal.value = true;
   autoCloseModal();
@@ -203,7 +224,7 @@ const closeModal = () => {
 const autoCloseModal = () => {
   autoCloseTimeout.value = setTimeout(() => {
     closeModal();
-  }, 5000); // Automatically close the modal after 5 seconds
+  }, 5000);
 };
 
 const loadContacts = async () => {
@@ -224,9 +245,10 @@ const addEntry = (type) => {
     recipients.value.push(entry);
     recipientErrors.value.push({});
   }
-  validateForm();
+  // validateForm();
 };
 
+// Confirm before removing a signer or recipient
 const confirmRemoveSigner = (index, type) => {
   if (confirm('Bạn có chắc chắn muốn xóa người này không?')) {
     if (type === 'signer') {
@@ -239,62 +261,45 @@ const confirmRemoveSigner = (index, type) => {
   }
 };
 
+// Select contact for signer or recipient
 const selectContact = (contact) => {
-  if (entryType.value === 'signer') {
-    const emptySigner = signers.value.find(signer => !signer.name && !signer.email);
-    if (emptySigner) {
-      emptySigner.name = contact.name;
-      emptySigner.email = contact.email;
-    } else {
-      signers.value.push({
-        name: contact.name,
-        email: contact.email,
-        method: 'Ký số'
-      });
-      signerErrors.value.push({});
-    }
-  } else if (entryType.value === 'recipient') {
-    const emptyRecipient = recipients.value.find(recipient => !recipient.name && !recipient.email);
-    if (emptyRecipient) {
-      emptyRecipient.name = contact.name;
-      emptyRecipient.email = contact.email;
-    } else {
-      recipients.value.push({
-        name: contact.name,
-        email: contact.email,
-        method: 'Nhận bản sao'
-      });
-      recipientErrors.value.push({});
-    }
+  const targetList = entryType.value === 'signer' ? signers : recipients;
+  const errorsList = entryType.value === 'signer' ? signerErrors : recipientErrors;
+
+  const emptyEntry = targetList.value.find(entry => !entry.name && !entry.email);
+  if (emptyEntry) {
+    emptyEntry.name = contact.name;
+    emptyEntry.email = contact.email;
+  } else {
+    targetList.value.push({ name: contact.name, email: contact.email, method: entryType.value === 'signer' ? 'Ký số' : 'Nhận bản sao' });
+    errorsList.value.push({});
   }
-  nextTick(() => {
-    const modalElement = document.getElementById('contactModal');
-    if (modalElement) {
-      const modal = bootstrap.Modal.getInstance(modalElement);
-      if (modal) {
-        modal.hide();
-      }
-    }
-  });
+  closeModal(); // Close modal after selecting contact
 };
 
 const setEntryType = (type) => {
   entryType.value = type;
 };
 
+// Form validation for required email and format
 const validateForm = () => {
   const validateEntries = (entries, errors) => {
-    return entries.every((entry, index) => {
-      let isValid = true;
-      if (!entry.email || !isValidEmail(entry.email)) {
-        errors[index].email = 'Invalid email format';
+
+    let isValid = true;
+     entries.forEach((entry, index) => {
+      if (!entry.email) {
+        errors[index].email = 'Email là bắt buộc.'; 
+        isValid = false;
+      } else if (!isValidEmail(entry.email)) {
+        errors[index].email = 'Sai định dạng email.';
         isValid = false;
       } else {
         errors[index].email = '';
       }
-      return isValid;
     });
+    return isValid;
   };
+
   const signersValid = validateEntries(signers.value, signerErrors.value);
   const recipientsValid = validateEntries(recipients.value, recipientErrors.value);
 
@@ -306,23 +311,23 @@ const isValidEmail = (email) => {
   return emailRegex.test(email);
 };
 
+// Navigation methods
 const handleBack = () => {
-  this.$router.push('/Chinh-sua-van-ban');
+  router.push('/Chinh-sua-van-ban');
 };
 
 const handleNext = () => {
   showErrors.value = true; // Show errors if any
   const isValid = validateForm();
 
-  if (isValid && signers.value.every(signer => signer.name && signer.email)) {
+  if (isValid) {
     const data = {
       signers: signers.value,
       recipients: recipients.value,
     };
 
     localStorage.setItem('signersRecipientsData', JSON.stringify(data));
-
-    this.$router.push('/Thiet-lap-vung-ky');
+    router.push('/Thiet-lap-vung-ky');
   }
 };
 
@@ -338,7 +343,11 @@ const loadSavedData = () => {
 };
 </script>
 
-
 <style scoped>
 @import '@/assets/AddPerson.css';
+
+.invalid-feedback {
+  display: block;
+  margin-top: 0.25rem;
+}
 </style>

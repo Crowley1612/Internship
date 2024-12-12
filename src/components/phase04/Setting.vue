@@ -130,7 +130,7 @@ C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
                         </a-tab-pane>
                         <!-- Đổi mật khẩu -->
                         <a-tab-pane key="3" tab="Đổi mật khẩu">
-                            <div class="change-password-container">
+                            <div class="change-password-container" @finish="onFinish">
                                 <h2>Thay đổi mật khẩu</h2>
                                 <p>Mật khẩu cần có tối thiểu 6 ký tự, bao gồm số, chữ cái thường, chữ in hoa, ký tự đặc
                                     biệt.</p>
@@ -141,22 +141,22 @@ C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
                                         <!-- Old Password Field -->
                                         <label style="margin-right: 20px;">Nhập mật khẩu cũ:</label>
                                         <a-form-item has-feedback name="oldPass" style="margin-right: 20px;">
-                                            <a-input v-model:value="formState.oldPass"
-                                                type="password" autocomplete="off" />
+                                            <a-input v-model:value="formState.oldPass" type="password"
+                                                autocomplete="off" />
                                         </a-form-item>
 
                                         <!-- Password Field -->
                                         <label style="margin-right: 20px;">Mật khẩu mới:</label>
                                         <a-form-item has-feedback name="pass">
-                                            <a-input v-model:value="formState.pass"
-                                                type="password" autocomplete="off" />
+                                            <a-input v-model:value="formState.pass" type="password"
+                                                autocomplete="off" />
                                         </a-form-item>
 
                                         <!-- Confirm Password Field -->
                                         <label style="margin-right: 20px;">Xác nhận mật khẩu:</label>
                                         <a-form-item has-feedback name="checkPass">
-                                            <a-input v-model:value="formState.checkPass"
-                                                type="password" autocomplete="off" />
+                                            <a-input v-model:value="formState.checkPass" type="password"
+                                                autocomplete="off" />
                                         </a-form-item>
 
                                         <!-- Submit and Reset Button -->
@@ -215,149 +215,235 @@ import { onMounted, reactive, ref } from 'vue';
 import axios from 'axios';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
+import { XMLParser } from 'fast-xml-parser';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-// Reactive states for settings and user
+const router = useRouter();
+const store = useStore();
+
+// Reactive states
 const settings = reactive({
     signingMethod: 'usb',
     registrationCode: '400196',
-    displayMethod: 'displaySignature'
+    displayMethod: 'displaySignature',
 });
 
 const user = reactive({
-  email: '',
-  username: '',
-  name: '',
-  phone: '',
-  taxcode: '',
-  company: ''
+    email: '',
+    username: '',
+    name: '',
+    phone: '',
+    taxcode: '',
+    company: '',
 });
 
 const formState = reactive({
     oldPass: '',
     pass: '',
-    checkPass: ''
+    checkPass: '',
 });
+
+// Convert XML to JSON
+const convertXmlToJson = (xmlData) => {
+    const parser = new XMLParser({
+        ignoreAttributes: false,
+    });
+    return parser.parse(xmlData);
+};
+
+// Load user information
 const loadUserInfo = async () => {
-  try {
-    const response = await axios.get('http://localhost:3003/users');
-    const userData = response.data[0]; // Assuming you want the first user in the array
+    const username = store.state.username; // Get username from store
+    console.log('Loading user information:', username);
+    try {
+        const soapRequest = `
+        <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+            <soap:Body>
+            <Laythongtintaikhoan xmlns="http://tempuri.org/">
+                <Email>${username}</Email>
+            </Laythongtintaikhoan>
+            </soap:Body>
+        </soap:Envelope>`;
 
-    // Populate the user reactive object with the fetched data
-    user.email = userData.email;
-    user.username = userData.username;
-    user.name = userData.name;
-    user.phone = userData.tel;
-    user.taxcode = userData.tax;
-    user.company = userData.org;
-  } catch (error) {
-    console.error('Error loading user information:', error);
-  }
+        const response = await axios({
+            baseURL: `https://apiedoc.nacencomm.vn/apiEdoc.asmx`,
+            method: "post",
+            headers: {
+                "Content-Type": "text/xml",
+            },
+            data: soapRequest,
+        });
+
+        const dataJson = convertXmlToJson(response.data);
+        const userInfo =
+            dataJson?.['soap:Envelope']?.['soap:Body']?.['LaythongtintaikhoanResponse']
+            ?.['LaythongtintaikhoanResult'];
+        console.log('User information:', userInfo);
+        if (userInfo) {
+            user.email = userInfo.Email || '';
+            user.username = userInfo.Email || '';
+            user.name = userInfo.Hoten || '';
+            user.phone = userInfo.Sodienthoai || '';
+            user.taxcode = userInfo.Masothue || '';
+            user.company = userInfo.Tentochuc || '';
+            console.log('User information loaded:', user);
+        } else {
+            console.warn('No user information found in response.');
+        }
+    } catch (error) {
+        console.error('Error loading user information:', error);
+    }
 };
-// Define ref for the form
-const formRef = ref(null);
 
-// Custom validation for Old Password
-const validateOldPass = async (_rule, value) => {
-    if (!value) return Promise.reject('Please input the old password');
-    return Promise.resolve();
-};
+// Reset password
+const resetPassword = async (params) => {
+    const userEmail = store.state.username;
+    const { oldPassword, newPassword } = params;
+    try {
+        const soapRequest = `
+        <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+            <soap:Body>
+            <Doimatkhau xmlns="http://tempuri.org/">
+                <Email>${userEmail}</Email>
+                <Matkhaucu>${oldPassword}</Matkhaucu>
+                <Matkhaumoi>${newPassword}</Matkhaumoi>
+            </Doimatkhau>
+            </soap:Body>
+        </soap:Envelope>`;
 
-// Custom validation for Password complexity
-const validatePasswordComplexity = (_rule, value) => {
-    const minLength = 6;
-    const hasNumber = /[0-9]/;
-    const hasLowercase = /[a-z]/;
-    const hasUppercase = /[A-Z]/;
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
+        const response = await axios({
+            baseURL: `https://apiedoc.nacencomm.vn/apiEdoc.asmx`,
+            method: "post",
+            headers: {
+                "Content-Type": "text/xml",
+                "SOAPAction": "http://tempuri.org/Doimatkhau"
+            },
+            data: soapRequest,
+        });
 
-    if (!value) return Promise.reject('Please input the password');
-    if (value.length < minLength) return Promise.reject(`Password must be at least ${minLength} characters long`);
-    if (!hasNumber.test(value)) return Promise.reject('Password must contain at least one number');
-    if (!hasLowercase.test(value)) return Promise.reject('Password must contain at least one lowercase letter');
-    if (!hasUppercase.test(value)) return Promise.reject('Password must contain at least one uppercase letter');
-    if (!hasSpecialChar.test(value)) return Promise.reject('Password must contain at least one special character');
+        const dataJson = convertXmlToJson(response.data);
+        const result =
+            dataJson?.['soap:Envelope']?.['soap:Body']?.['DoimatkhauResponse']
+            ?.['DoimatkhauResult'];
 
-    return Promise.resolve();
-};
-
-// Custom validation for Confirm Password field
-const validateConfirmPassword = async (_rule, value) => {
-    if (!value) return Promise.reject('Please input the password again');
-    if (value !== formState.pass) return Promise.reject("Passwords don't match");
-    return Promise.resolve();
+        console.log('Password reset result:', result);
+        return result;
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        return '0';
+    }
 };
 
 // Form validation rules
 const rules = {
-    oldPass: [{ required: true, validator: validateOldPass, trigger: 'change' }],
-    pass: [
-        { required: true, validator: validatePasswordComplexity, trigger: 'change' }
+    oldPass: [
+        {
+            required: true,
+            validator: async (_rule, value) => {
+                if (!value) throw new Error('Please input the old password');
+            },
+            trigger: 'change',
+        },
     ],
-    checkPass: [{ validator: validateConfirmPassword, trigger: 'change' }],
+    pass: [
+        {
+            required: true,
+            validator: (_rule, value) => {
+                const minLength = 6;
+                const hasNumber = /[0-9]/;
+                const hasLowercase = /[a-z]/;
+                const hasUppercase = /[A-Z]/;
+                const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
+
+                if (!value) throw new Error('Please input the password');
+                if (value.length < minLength)
+                    throw new Error(`Password must be at least ${minLength} characters long`);
+                if (!hasNumber.test(value))
+                    throw new Error('Password must contain at least one number');
+                if (!hasLowercase.test(value))
+                    throw new Error('Password must contain at least one lowercase letter');
+                if (!hasUppercase.test(value))
+                    throw new Error('Password must contain at least one uppercase letter');
+                if (!hasSpecialChar.test(value))
+                    throw new Error('Password must contain at least one special character');
+            },
+            trigger: 'change',
+        },
+    ],
+    checkPass: [
+        {
+            validator: (_rule, value) => {
+                if (!value) throw new Error('Please input the password again');
+                if (value !== formState.pass)
+                    throw new Error("Passwords don't match");
+            },
+            trigger: 'change',
+        },
+    ],
 };
 
-// Form layout configuration
-const layout = {
-    labelCol: { span: 4 },
-    wrapperCol: { span: 14 }
-};
+// Form actions
+const formRef = ref(null);
+const onFinish = async () => {
+    try {
+        const result = await resetPassword({
+            userEmail: user.email,
+            oldPassword: formState.oldPass,
+            newPassword: formState.pass,
+        });
 
-// Form submission handling
-const handleFinish = values => {
-    console.log('Form submitted successfully:', values);
-};
-
-const handleFinishFailed = errors => {
-    console.log('Form submission failed:', errors);
-};
-
-// Reset form fields
-const resetForm = () => {
-    if (formRef.value) {
-        formRef.value.resetFields();
+        if (result === 1) {
+            console.log('Password reset successful');
+        } else {
+            console.error('Password reset failed');
+        }
+    } catch (error) {
+        console.error('Error during form submission:', error);
     }
 };
 
-// Log form validation events
-const handleValidate = (...args) => {
-    console.log('Validation triggered:', args);
+const onFinishFailed = (errorInfo) => {
+    console.error('Form validation failed:', errorInfo);
 };
 
-const loading = ref(false);
+// Modal actions
 const isModalOpen = ref(false);
 const editUser = reactive({ ...user });
+const loading = ref(false);
 
-function updateRegistrationCode() {
-    alert('Mã đăng ký đã được cập nhật: ' + settings.registrationCode);
-}
-
-function showModal() {
+const showModal = () => {
     Object.assign(editUser, user);
     isModalOpen.value = true;
-}
+};
 
-async function handleOk() {
-    console.log(editUser); // Check if the updated values are correct
+const handleOk = async () => {
     loading.value = true;
     try {
-        // Simulate API call
         Object.assign(user, editUser);
         console.log('Updated user:', user);
         isModalOpen.value = false;
     } catch (error) {
-        console.error(error);
+        console.error('Error updating user:', error);
     } finally {
         loading.value = false;
     }
-}
+};
+const resetForm = () => {
+    formState.oldPass = '';
+    formState.pass = '';
+    formState.checkPass = '';
+};
 
-function handleCancelModal() {
+const handleCancelModal = () => {
     isModalOpen.value = false;
-}
+};
+
 onMounted(() => {
     loadUserInfo();
 });
 </script>
+
 
 
 <style scoped>

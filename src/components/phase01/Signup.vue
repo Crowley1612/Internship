@@ -1,116 +1,50 @@
 <template>
-  <div
-    class="signUpForm container-fluid d-flex justify-content-center align-items-center min-vh-100"
-  >
+  <div class="signUpForm container-fluid d-flex justify-content-center align-items-center min-vh-100">
     <VForm @submit="submitForm" class="w-100">
       <div class="login card shadow-sm p-4">
-        <img src="@/assets/download.png" alt="" class="img" />
+        <img src="C:/Users/Shinei/Desktop/Vuejs/ca2-platform/src/assets/download.png" alt="" class="img">
         <h1 class="center card-title">Đăng ký tài khoản</h1>
         <div class="card-body">
           <div class="form-group mb-3">
-            <Field name="username" v-slot="{ field, meta }">
-              <label for="username"
-                ><span class="required">*</span> Họ và tên</label
-              >
-              <input
-                v-bind="field"
-                type="text"
-                placeholder="Nhập họ và tên"
-                :class="[
-                  'form-control',
-                  { 'is-invalid': meta.touched && meta.invalid },
-                ]"
-                @input="(e) => handleInput('username', e.target.value)"
-              />
-              <span
-                v-if="meta.touched && meta.invalid"
-                class="invalid-feedback"
-              >
-                {{ meta.errors[0] }}
-              </span>
+            <Field name="username" rules="required" v-slot="{ field, meta }">
+              <label for="username"><span class="required">*</span> Họ và tên</label>
+              <input type="text" v-bind="field" placeholder="Nhập họ và tên"
+                :class="['form-control', { 'is-invalid': meta.touched && meta.invalid }]" />
+              <span v-if="meta.touched && meta.invalid" class="invalid-feedback">{{ meta.errors[0] }}</span>
             </Field>
           </div>
-
           <div class="form-group mb-3">
-            <Field name="email" v-slot="{ field, meta }">
+            <Field name="email" rules="required|email" v-slot="{ field, meta }">
               <label for="email"><span class="required">*</span> Email</label>
-              <input
-                v-bind="field"
-                type="text"
-                placeholder="Nhập email"
-                :class="[
-                  'form-control',
-                  { 'is-invalid': meta.touched && meta.invalid },
-                ]"
-                @input="(e) => handleInput('email', e.target.value)"
-              />
-              <span
-                v-if="meta.touched && meta.invalid"
-                class="invalid-feedback"
-              >
-                {{ meta.errors[0] }}
-              </span>
+              <input type="text" v-bind="field" placeholder="Nhập email"
+                :class="['form-control', { 'is-invalid': meta.touched && meta.invalid }]" />
+              <span v-if="meta.touched && meta.invalid" class="invalid-feedback">{{ meta.errors[0] }}</span>
             </Field>
           </div>
-
           <div class="form-group mb-3">
-            <Field name="tel" v-slot="{ field, meta }">
-              <label for="tel"
-                ><span class="required">*</span> Số điện thoại</label
-              >
-              <input
-                v-bind="field"
-                type="tel"
-                placeholder="Nhập số điện thoại"
-                :class="[
-                  'form-control',
-                  { 'is-invalid': meta.touched && meta.invalid },
-                ]"
-                @input="(e) => handleInput('tel', e.target.value)"
-              />
-              <span
-                v-if="meta.touched && meta.invalid"
-                class="invalid-feedback"
-              >
-                {{ meta.errors[0] }}
-              </span>
+            <Field name="tel" rules="required|min:10" v-slot="{ field, meta }">
+              <label for="tel"><span class="required">*</span> Số điện thoại</label>
+              <input type="tel" v-bind="field" placeholder="Nhập số điện thoại"
+                :class="['form-control', { 'is-invalid': meta.touched && meta.invalid }]" />
+              <span v-if="meta.touched && meta.invalid" class="invalid-feedback">{{ meta.errors[0] }}</span>
             </Field>
           </div>
-
           <div class="form-group mb-3">
             <Field name="org" v-slot="{ field }">
               <label for="org">Tên tổ chức</label>
-              <input
-                v-bind="field"
-                type="text"
-                placeholder="Nhập tên tổ chức"
-                class="form-control"
-                @input="(e) => handleInput('org', e.target.value)"
-              />
+              <input type="text" v-bind="field" placeholder="Nhập tên tổ chức" class="form-control" />
             </Field>
           </div>
-
           <div class="form-group mb-3">
             <Field name="tax" v-slot="{ field }">
               <label for="tax">Mã số thuế</label>
-              <input
-                v-bind="field"
-                type="text"
-                placeholder="Nhập mã số thuế"
-                class="form-control"
-                @input="(e) => handleInput('tax', e.target.value)"
-              />
+              <input type="text" v-bind="field" placeholder="Nhập mã số thuế" class="form-control" />
             </Field>
           </div>
-
-          <button type="submit" class="btn btn-primary w-100">
-            Gửi yêu cầu đăng ký
-          </button>
+          <button type="submit" class="btn btn-primary w-100">Gửi yêu cầu đăng ký</button>
           <p class="center-bottom mt-3">
             Bạn đã có tài khoản?
-            <router-link to="/Dang-nhap" class="text-primary"
-              >Đăng nhập</router-link
-            >
+            <router-link to="/Dang-nhap" class="text-primary">Đăng nhập</router-link>
           </p>
         </div>
       </div>
@@ -119,84 +53,99 @@
 </template>
 
 <script>
-import { useForm, Field, Form as VForm } from "vee-validate";
-import * as yup from "yup";
-import axios from "axios";
+import { useForm, Field, Form as VForm } from 'vee-validate';
+import * as yup from 'yup';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 export default {
-  name: "Signup",
+  name: 'Signup',
   components: {
     VForm,
     Field,
   },
   setup() {
-    const { values, validate, setFieldValue } = useForm({
-      initialValues: {
-        username: "",
-        email: "",
-        tel: "",
-        org: "",
-        tax: "",
-      },
+    const router = useRouter();
+    const store = useStore();
+    const { validate, values } = useForm({
       validationSchema: yup.object({
-        username: yup.string().required("Họ và tên là bắt buộc."),
-        email: yup
-          .string()
-          .email("Email không hợp lệ.")
-          .required("Email là bắt buộc."),
-        tel: yup
-          .string()
-          .matches(/^[0-9]+$/, "Số điện thoại chỉ được chứa chữ số.")
-          .min(10, "Số điện thoại phải có ít nhất 10 chữ số.")
-          .required("Số điện thoại là bắt buộc."),
-        org: yup.string(),
-        tax: yup.string(),
-      }),
+        username: yup.string().required('Họ và tên là bắt buộc.'),
+        email: yup.string().email('Email không hợp lệ.').required('Email là bắt buộc.'),
+        tel: yup.string().min(10, 'Số điện thoại phải có ít nhất 10 chữ số.').required('Số điện thoại là bắt buộc.'),
+      })
     });
 
-    // Handle input changes and set field values
-    const handleInput = (fieldName, value) => {
-      setFieldValue(fieldName, value);
-      console.log(`${fieldName}: ${value}`); // Log the field name and value
+    const createSoapEnvelope = (method, parameters) => {
+      return `
+        <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+          <soap12:Body>
+            <${method} xmlns="http://tempuri.org/">
+              ${parameters}
+            </${method}>
+          </soap12:Body>
+        </soap12:Envelope>`;
     };
 
-    const submitForm = async () => {
-      const isValid = await validate();
-      if (!isValid) {
-        alert("Vui lòng nhập đủ thông tin bắt buộc.");
-        return;
-      }
+    const parseXmlResponse = (xmlString, tagName) => {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+      return xmlDoc.getElementsByTagName(tagName)[0]?.childNodes[0]?.nodeValue || null;
+    };
 
-      const userData = {
-        id: Date.now(),
-        username: values.username,
-        email: values.email,
-        tel: values.tel,
-        org: values.org,
-        tax: values.tax,
-      };
-
-      console.log("User data to be submitted:", userData); // Log data before submission
-
+    const activateAccount = async (email) => {
       try {
         const response = await axios.post(
-          "http://localhost:3003/users",
-          userData
+          'https://apiedoc.nacencomm.vn/apiEdoc.asmx?op=Kichhoattaikhoan',
+          createSoapEnvelope('Kichhoattaikhoan', `<Taikhoan>${email}</Taikhoan>`),
+          { headers: { 'Content-Type': 'application/soap+xml' } }
         );
-        console.log("Response from server:", response.data);
-        alert("Đăng ký thành công!");
+        return parseXmlResponse(response.data, "KichhoattaikhoanResult");
       } catch (error) {
-        console.error(
-          "Error during registration:",
-          error.response ? error.response.data : error
+        console.error('Activation error:', error);
+        return null;
+      }
+    };
+
+    const handleResponse = async (response, email) => {
+      const result = parseXmlResponse(response, "DangkyResult");
+      if (result == 1) {
+        const activationResult = await activateAccount(email);
+        if (activationResult == 1) {
+          store.dispatch('updateEmail', email);
+          alert('Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.');
+          router.push('/Xac-nhan-email');
+        } else {
+          alert('Kích hoạt không thành công. Vui lòng thử lại.');
+        }
+      } else {
+        alert('Đăng ký không thành công. Vui lòng thử lại.');
+      }
+    };
+
+    const submitForm = async (values1) => {
+      const parameters = `
+        <TTDangky>
+          <Email>${values1.email}</Email>
+          <Hoten>${values1.username}</Hoten>
+          <Sodienthoai>${values1.tel}</Sodienthoai>
+          <Masothue>${values1.tax || ""}</Masothue>
+          <Tentochuc>${values1.org || ""}</Tentochuc>
+        </TTDangky>`;
+      try {
+        const response = await axios.post(
+          'https://apiedoc.nacencomm.vn/apiEdoc.asmx',
+          createSoapEnvelope('Dangky', parameters),
+          { headers: { 'Content-Type': 'application/soap+xml' } }
         );
+        await handleResponse(response.data, values1.email);
+      } catch (error) {
+        console.error('Registration error:', error);
       }
     };
 
     return {
       submitForm,
-      handleInput, // Use handleInput for updating field values
-      values, // Ensure that values are returned to the template for v-model binding
     };
   },
 };

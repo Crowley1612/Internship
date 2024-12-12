@@ -2,182 +2,298 @@
   <div class="container-fluid h-100">
     <div class="row h-100">
       <Sidebar />
-      <div class="col-md-10 p-4">
+      <div class="col-md-10 p-4 content-area">
         <Header />
         <Navbar />
         <div class="row">
-          <!-- Left Column: Controls -->
-          <div class="col-md-3 left-column">
-            <div class="controls">
-              <button @click="toggleEmailSelect" class="btn btn-info">
-                {{ showEmailSelect ? 'Ẩn Chọn Người Ký' : '+ Thêm Vùng Ký' }}
-              </button>
-              <div v-if="showEmailSelect">
-                <label for="email-select">Chọn người ký và Trình Tự Ký:</label>
-                <select v-model="selectedEmails" id="email-select" multiple @change="updateLinkedList">
-                  <option v-for="(item, index) in linkedList" :key="index" :value="item.email">
-                    {{ item.email }} - Trình tự: {{ item.order }}
-                  </option>
-                </select>
+          <!-- Left Column -->
+          <div class="col-md-3 left-column bg-light p-3 rounded shadow-sm">
+            <h5 class="text-primary mb-3">Chọn Người Ký</h5>
+            <button @click="toggleEmailSelect" class="btn btn-info w-100 mb-3">
+              {{ showEmailSelect ? 'Ẩn Chọn Người Ký' : '+ Thêm Vùng Ký' }}
+            </button>
+            <div v-if="showEmailSelect">
+              <label for="email-select" class="form-label">Người ký và Trình Tự Ký:</label>
+              <select v-model="selectedEmails" id="email-select" class="form-select mb-3" multiple
+                @change="updateLinkedList">
+                <option v-for="(item, index) in linkedList" :key="index" :value="item.email">
+                  {{ item.email }} - Trình tự: {{ item.order }}
+                </option>
+              </select>
+            </div>
+            <button @click="saveRectangles" class="btn btn-success w-100 mb-2">Lưu Vùng Ký</button>
+            <button @click="enableDrawing" class="btn btn-warning w-100 mb-2">Tạo Vùng Ký</button>
+            <button @click="completeSetup" class="btn btn-primary w-100">Hoàn tất</button>
+          </div>
+
+          <!-- Middle Column -->
+          <div class="col-md-6 middle-column bg-white p-3 rounded shadow-sm">
+            <div class="text-center mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <button @click="cancelRectangles" class="btn btn-danger">Hủy Vùng Ký</button>
+                <input type="file" accept=".pdf" @change="onFileChange" ref="fileInput" hidden />
+                <button @click="$refs.fileInput.click()" class="btn btn-secondary">Chọn file PDF</button>
               </div>
-              <button @click="saveSignatureArea" class="btn btn-success">Lưu Vùng Ký</button>
-              <button @click="completeSetup" class="btn btn-primary">Hoàn tất</button>
+            </div>
+
+            <div class="d-flex justify-content-center my-4">
+              <div class="d-flex align-items-center me-4">
+                <button @click="scaleDown" class="btn btn-outline-secondary">-</button>
+                <span class="mx-2">{{ (scale * 100).toFixed(0) }}%</span>
+                <button @click="scaleUp" class="btn btn-outline-secondary">+</button>
+              </div>
+              <div class="d-flex align-items-center">
+                <button @click="backTrangky" class="btn btn-outline-secondary">←</button>
+                <span class="mx-2">Trang {{ Trangky }} / {{ totalPage }}</span>
+                <button @click="nextTrangky" class="btn btn-outline-secondary">→</button>
+              </div>
+            </div>
+
+            <div class="pdf-viewer">
+              <canvas ref="pdfCanvas" style="display: none"></canvas>
+              <v-stage ref="stageRef" :config="stageConfig" @mousedown="handleMouseDown" @mouseup="handleMouseUp"
+                @mousemove="handleMouseMove" class="pdf-stage">
+                <v-layer>
+                  <v-image :image="image" />
+                  <v-rect v-if="drawing" :x="startX" :y="startY" :width="currentWidth" :height="currentHeight"
+                    fill="rgba(0, 0, 255, 0.3)" />
+                  <v-rect v-if="rec" :x="rec.x" :y="rec.y" :width="rec.width" :height="rec.height"
+                    fill="rgba(0, 0, 255, 0.3)" />
+                </v-layer>
+              </v-stage>
             </div>
           </div>
 
-          <!-- Middle Column: PDF Viewer and Signature Drawing -->
-          <div class="col-md-6 middle-column" style="position: relative;">
-  <div class="pdf-container" ref="containerRef"
-       @mousedown="startDrawing(null, $event)"
-       @mousemove="draw"
-       @mouseup="endDrawing">
-    <canvas v-for="page in pages" :key="page.num"
-            :ref="'canvas-' + page.num"
-            @mousedown="startDrawing(page.num, $event)"
-            @mousemove="draw"
-            @mouseup="endDrawing"></canvas>
-
-    <!-- Signature Areas -->
-    <div v-for="(area, index) in signatureAreas" :key="index"
-         :style="{ top: area.y + 'px', left: area.x + 'px', width: 'auto', height: 'auto', position: 'absolute' }"
-         class="signature-area"
-         @mousedown="startDragging($event, area)"
-         @mousemove="drag"
-         @mouseup="endDragging"
-         @click="toggleButtons(index)">
-      <span>Vùng ký cho <br>{{ area.email }}</span>
-      <div class="drawing-buttons" v-if="area.showButtons">
-        <button @click="deleteSignatureArea(area)" class="btn btn-danger">Xóa</button>
-        <button @click="updateSignatureArea(area)" class="btn btn-warning">Cập nhật</button>
-      </div>
-    </div>
-  </div>
-
-  <div v-if="isDrawing" class="drawing-area"
-       :style="{ top: drawingArea.y + 'px', left: drawingArea.x + 'px', width: drawingArea.width + 'px', height: drawingArea.height + 'px' }">
-  </div>
-</div>
-
-
-          <!-- Right Column: File List -->
-          <div class="col-md-3 right-column">
-            <h4 class="title">Tài liệu ({{ pdfFiles.length }})</h4>
-            <ul class="file-list">
-              <li v-for="file in pdfFiles" :key="file.name" class="file-item">
-                <button @click="showPdf(file)" class="btn btn-primary">
-                  {{ file.name }}
-                </button>
-              </li>
+          <!-- Right Column -->
+          <div class="col-md-3 right-column bg-light p-3 rounded shadow-sm">
+            <h5 class="text-primary mb-3">Tài liệu ({{ pdfFiles.length }})</h5>
+            <ul class="list-group">
+            
             </ul>
           </div>
-        </div>
-
-        <!-- Navigation Buttons -->
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-          <button class="btn btn-secondary me-md-2" type="button" @click="handleBack">Quay lại</button>
-          <button class="btn btn-primary" type="button" @click="handleNext">Gửi yêu cầu</button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, nextTick, watch } from 'vue';
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+<script setup lang="ts">
+import { onMounted, reactive, ref, toRaw, } from 'vue'
 import Navbar from '../layout/Processing.vue';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
+import * as pdfjsLib from "pdfjs-dist/build/pdf.mjs";
 import { useRouter } from 'vue-router';
+// this import is needed in to configure a default worker for pdfjs
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs';
+import {cloneDeep} from "lodash-es";
 
-GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs';
-
+defineProps<{ msg: string }>()
+const pdfCanvas = ref(null);
+const pdfDocument = ref<any>();
+const totalPage = ref();
+const Trangky = ref(1);
+const viewportConst = reactive<any>({});
+const scale = ref(1);
 const pdfFiles = ref([]);
-const pdfUrl = ref('');
-const signatureAreas = ref([]);
-const selectedEmails = ref([]);
-const showEmailSelect = ref(false);
-const linkedList = ref([]);
-const containerRef = ref(null);
-const isDrawing = ref(false);
-const drawingArea = ref({ x: 0, y: 0, width: 0, height: 0 });
-const hoveredArea = ref(null);
-const pages = ref([]);
+const router = useRouter();
+const stageConfig = reactive({
+  width: 800,
+  height: 800,
+});
+const image = ref<any>();
+const startDrawing = ref(false);
+const drawing = ref(false);
 const startX = ref(0);
 const startY = ref(0);
-let drawingStep = 0;
-const router = useRouter();
-let draggingArea = null;
-let offsetX = 0;
-let offsetY = 0;
-
-const startDragging = (event, area) => {
-  draggingArea = area;
-  const rect = containerRef.value.getBoundingClientRect();
-  offsetX = event.clientX - rect.left - area.x;
-  offsetY = event.clientY - rect.top - area.y;
-
-  // Ngăn không cho sự kiện chuột nổi lên
-  event.preventDefault();
-};
-
-const drag = (event) => {
-  if (!draggingArea) return;
-
-  const rect = containerRef.value.getBoundingClientRect();
-  draggingArea.x = event.clientX - rect.left - offsetX;
-  draggingArea.y = event.clientY - rect.top - offsetY;
-};
-
-const endDragging = () => {
-  draggingArea = null;
-};
-
-const toggleButtons = (index) => {
-  signatureAreas.value.forEach((area, idx) => {
-    area.showButtons = idx === index ? !area.showButtons : false; // Toggle for clicked area, hide others
-  });
-};
-
-
-const handleBack = () => {
-  router.push('/Them-nguoi');
-};
-
-const handleNext = () => {
-  router.push('/Xac-nhan');
-};
+const rec = ref<any>([]);
+const stageRef = ref();
+const currentWidth = ref(0);
+const currentHeight = ref(0);
+const fileInput = ref();
+const showEmailSelect = ref(false);
+interface Signer {
+  email: string;
+  order: number;
+}
+const linkedList = ref<Signer[]>([]);
+const drawingState = ref(0);
+const signatureAreas = ref([]);
+const selectedEmails = ref<string[]>([]);
 
 onMounted(async () => {
-  loadPdfFilesFromLocalStorage();
   await fetchSigners();
 
   if (linkedList.value.length > 0) {
     selectedEmails.value = linkedList.value.map(item => item.email);
   }
+  //Production
+  const url = '/test.pdf';
 
-  if (pdfUrl.value) {
-    await nextTick();
-    await renderPdf(pdfUrl.value);
-  }
+  const loadingTask = pdfjsLib.getDocument(url);
+  pdfDocument.value = await loadingTask.promise;
+  totalPage.value = pdfDocument.value.numPages;
+  await getImageData();
 });
 
-watch(pdfUrl, async (newUrl) => {
-  if (newUrl) {
-    await nextTick();
-    await renderPdf(newUrl);
-  }
-});
+const getImageData = async () => {
+  const page = await toRaw(pdfDocument.value).getPage(Trangky.value);
+  const canvas: any = pdfCanvas.value;
+  const viewport = page.getViewport({ scale: scale.value });
+  canvas.height = viewport.height;
+  canvas.width = viewport.width;
+  canvas.style.height = `${viewport.width * window.devicePixelRatio}px`;
+  canvas.style.width = `${viewport.width * window.devicePixelRatio}px`;
+  viewportConst.height = viewport.height;
+  viewportConst.width = viewport.width;
+  stageConfig.height = viewport.height;
+  stageConfig.width = viewport.width;
+  const canvasContext = canvas.getContext("2d");
+  const renderContext = {
+    canvasContext,
+    viewport,
+  };
+  await page.render(renderContext).promise;
 
-const loadPdfFilesFromLocalStorage = () => {
-  const files = localStorage.getItem('pdfFiles');
-  if (files) {
-    pdfFiles.value = [
-      { name: "Sample PDF", url: "https://pdfobject.com/pdf/sample.pdf" }
-    ];
+  const imageDataURL = canvas.toDataURL();
+  image.value = new window.Image();
+  image.value.src = imageDataURL;
+};
+const backTrangky = async () => {
+  Trangky.value = Trangky.value > 1 ? Trangky.value - 1 : Trangky.value;
+  await getImageData();
+};
+const nextTrangky = async () => {
+  Trangky.value =
+    Trangky.value < totalPage.value ? Trangky.value + 1 : Trangky.value;
+  await getImageData();
+};
+const scaleUp = async () => {
+  scale.value = scale.value < 2 ? scale.value + 0.25 : scale.value;
+  await getImageData();
+};
+const scaleDown = async () => {
+  scale.value = scale.value > 0.25 ? scale.value - 0.25 : scale.value;
+  await getImageData();
+};
+
+const handleMouseDown = () => {
+  if (startDrawing.value) {
+    drawing.value = true;
+    const pos = getPointerPosition();
+    startX.value = pos.x;
+    startY.value = pos.y;
   }
 };
 
+const handleMouseUp = () => {
+  if (drawing.value) {
+    drawing.value = false;
+    const pos = getPointerPosition();
+    const width = pos.x - startX.value;
+    const height = pos.y - startY.value;
+    rec.value = { x: startX.value, y: startY.value, width, height };
+  }
+
+  currentWidth.value = 0;
+  currentHeight.value = 0;
+};
+
+const getPointerPosition = () => {
+  return stageRef.value.getStage().getPointerPosition();
+};
+
+
+
+const handleMouseMove = () => {
+  if (!drawing.value) return;
+
+  const pos = getPointerPosition();
+  const width = pos.x - startX.value;
+  const height = pos.y - startY.value;
+
+  currentWidth.value = width;
+  currentHeight.value = height;
+};
+
+const enableDrawing = () => {
+  const dataKy: any = {
+    Hinhthucky: 0,
+    TaikhoanDB: "admin",
+    Trinhtuky: 1,
+    label: "dinhnhat0810@gmail.com(Trình tự ký 1)",
+    value: "dinhnhat0810@gmail.com_1"
+  }
+  if (dataKy && dataKy.daKyNhap === 1) {
+    rec.value = dataKy.rec;
+    Trangky.value = dataKy.Trangky;
+    Object.assign(stageConfig, dataKy.stageConfig);
+    scale.value = dataKy.scale;
+  }
+  startDrawing.value = true;
+  drawingState.value = 1;
+};
+const saveRectangles = () => {
+  console.log("Hình đã vẽ:", rec.value);
+  console.log(
+    "File - Chiều dài :" +
+    stageConfig.height +
+    "||  Chiều rộng :" +
+    stageConfig.width
+  );
+  console.log("page :" + Trangky.value);
+  console.log("scale :" + scale.value);
+
+
+  const x1 = rec.value.x / scale.value;
+  const y1 = (stageConfig.height - rec.value.y) / scale.value;
+  const x2 = (rec.value.x + rec.value.width) / scale.value;
+  const y2 = (y1 - rec.value.height) / scale.value;
+
+  const newData = {
+    Trangky: cloneDeep(Trangky.value),
+    rec: cloneDeep(rec.value),
+    stageConfig: cloneDeep(stageConfig),
+    scale: cloneDeep(scale.value),
+    daKyNhap: 1,
+    info: `${x1} ${y1} ${x2} ${y2} Trang số: ${Trangky.value}`
+  }
+
+  alert("Đã lưu vùng ký với toa độ" + newData.info);
+
+  drawingState.value = 2;
+  startDrawing.value = false;
+
+}
+
+const cancelRectangles = () => {
+  rec.value = null;
+
+  drawingState.value = 0;
+  startDrawing.value = false;
+};
+
+const onFileChange = async (e: any) => {
+  const file = e.target.files[0];
+  const fileReader = new FileReader();
+  fileReader.onload = async (e: any) => {
+    const typedArray = new Uint8Array(e.target.result);
+    const pdf = await pdfjsLib.getDocument(typedArray).promise;
+    pdfDocument.value = pdf;
+    totalPage.value = pdf.numPages;
+    Trangky.value = 1;
+    await getImageData();
+
+  };
+  fileReader.readAsArrayBuffer(file);
+};
+
+const toggleEmailSelect = () => {
+  showEmailSelect.value = !showEmailSelect.value;
+  if (showEmailSelect.value) {
+    fetchSigners();
+  }
+};
 const fetchSigners = async () => {
   try {
     const savedContacts = localStorage.getItem('signersRecipientsData');
@@ -190,103 +306,9 @@ const fetchSigners = async () => {
     console.error('Error fetching signers list:', error.message);
   }
 };
-
-const showPdf = (file) => {
-  pdfUrl.value = file.url;
+const updateLinkedList = () => {
+  linkedList.value = selectedEmails.value.map((email, index) => ({ email, order: index + 1 }));
 };
-
-const renderPdf = async (url) => {
-  try {
-    const container = containerRef.value;
-    if (!container) return;
-
-    const loadingTask = getDocument(url);
-    const pdf = await loadingTask.promise;
-    const numPages = pdf.numPages;
-
-    pages.value = [];
-    container.innerHTML = '';
-
-    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-      const page = await pdf.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 1 });
-
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      if (!context) continue;
-
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      container.appendChild(canvas);
-
-      const renderContext = { canvasContext: context, viewport: viewport };
-      await page.render(renderContext).promise;
-
-      pages.value.push({ num: pageNum, canvas });
-    }
-  } catch (error) {
-    console.error('Error rendering PDF:', error.message);
-  }
-};
-
-const toggleEmailSelect = () => {
-  showEmailSelect.value = !showEmailSelect.value;
-  if (showEmailSelect.value) {
-    fetchSigners();
-  }
-};
-
-const startDrawing = (pageNum, event) => {
-  if (isDrawing.value || signatureAreas.value.length >= linkedList.value.length) {
-    // alert('Đã hoàn thành việc vẽ vùng ký cho tất cả người ký.');
-    return;
-  }
-
-  const rect = event.target.getBoundingClientRect();
-  startX.value = event.clientX - rect.left;
-  startY.value = event.clientY - rect.top;
-  isDrawing.value = true;
-
-  drawingArea.value = { x: startX.value, y: startY.value, width: 0, height: 0 };
-};
-
-const draw = (event) => {
-  if (!isDrawing.value) return;
-
-  const rect = event.target.getBoundingClientRect();
-  const currentX = event.clientX - rect.left;
-  const currentY = event.clientY - rect.top;
-
-  drawingArea.value = {
-    x: startX.value,
-    y: startY.value,
-    width: currentX - startX.value,
-    height: currentY - startY.value,
-  };
-};
-
-const endDrawing = () => {
-  if (isDrawing.value) {
-    const email = selectedEmails.value[drawingStep];
-    signatureAreas.value.push({
-      ...drawingArea.value,
-      email,
-    });
-    drawingStep++;
-
-    isDrawing.value = false;
-    drawingArea.value = { x: 0, y: 0, width: 0, height: 0 };
-  }
-};
-
-const saveSignatureArea = () => {
-  if (signatureAreas.value.length === 0) {
-    alert('Vui lòng vẽ ít nhất một vùng ký.');
-  } else {
-    alert('Vùng ký đã được lưu thành công.');
-  }
-};
-
 const completeSetup = () => {
   if (signatureAreas.value.length === 0) {
     alert('Vui lòng vẽ ít nhất một vùng ký.');
@@ -295,33 +317,51 @@ const completeSetup = () => {
     handleNext();
   }
 };
-
-const deleteSignatureArea = (area) => {
-  signatureAreas.value = signatureAreas.value.filter(item => item !== area);
-  drawingStep--;
+const handleBack = () => {
+  router.push('/Them-nguoi');
 };
 
-const updateSignatureArea = (area) => {
-  // Implement logic for updating a specific signature area
+const handleNext = () => {
+  router.push('/Xac-nhan');
 };
 </script>
-  
+
 <style scoped>
-@import '@/assets/Display.css';
-.pdf-container {
+.content-area {
+  background-color: #f8f9fa;
+}
+
+.left-column,
+.right-column {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.middle-column {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pdf-viewer {
   position: relative;
+  width: 100%;
+  height: 70vh;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   overflow: hidden;
 }
 
-.signature-area {
-  position: absolute;
-  border: 2px dashed #007bff;
-  background: rgba(0, 123, 255, 0.1);
+.pdf-stage {
+  width: 100%;
+  height: 100%;
 }
 
-.drawing-area {
-  position: absolute;
-  border: 2px solid #28a745;
-  background: rgba(40, 167, 69, 0.2);
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

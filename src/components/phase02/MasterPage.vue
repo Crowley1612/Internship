@@ -222,9 +222,9 @@
 
 <script>
 import axios from 'axios';
+import { debounce } from 'lodash';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
-import { fetchData } from 'pdfjs-dist';
 export default {
   components: {
     Header,
@@ -393,8 +393,8 @@ export default {
             alert("Xóa thành công!");
           })
           .catch((error) => {
-            console.error("Error deleting document:", error); 
-            alert("Có lỗi xảy ra khi xóa."); 
+            console.error("Error deleting document:", error);
+            alert("Có lỗi xảy ra khi xóa.");
           });
       }
     },
@@ -486,7 +486,7 @@ export default {
     shareDocument(item) {
       console.log('Share:', item);
     },
-   
+
     filterDocumentsByDate() {
       const start = new Date(this.startDate);
       const end = new Date(this.endDate);

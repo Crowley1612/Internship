@@ -2,6 +2,8 @@
 import Login from "./components/phase01/Login.vue";
 import Signup from "./components/phase01/Signup.vue";
 import Forgotpassword from "./components/phase01/Forgotpassword.vue";
+import ConfirmEmail from "./components/phase01/ConfirmEmail.vue";
+import PasswordSetup from "./components/phase01/PasswordSetup.vue";
 //Phase02
 import MasterPage from "./components/phase02/MasterPage.vue";
 //Phase03
@@ -41,6 +43,16 @@ const routes = [
     name: "Login",
     component: Login,
     path: "/Dang-nhap",
+  },
+  {
+    name: "ConfirmEmail",
+    component: ConfirmEmail,
+    path: "/Xac-nhan-email",
+  },
+  {
+    name: "PasswordSetup",
+    component: PasswordSetup,
+    path: "/Tao-mat-khau",
   },
   //Password
   {

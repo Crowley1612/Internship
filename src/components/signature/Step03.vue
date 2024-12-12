@@ -77,7 +77,7 @@ import Navbar from '../layout/Processing.vue';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 import { useRouter } from 'vue-router';
-
+import * as pdfjsLib from "pdfjs-dist/build/pdf.mjs";
 // PDF.js worker setup
 GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.worker.min.mjs';
 
@@ -96,6 +96,7 @@ const startX = ref(0);
 const startY = ref(0);
 let drawingStep = 0;
 const router = useRouter();
+const Page = ref(1);
 
 const handleBack = () => {
   router.push('/Them-nguoi');
@@ -118,6 +119,41 @@ onMounted(async () => {
     await renderPdf(pdfUrl.value);
   }
 });
+const handleMouseDown = () => {
+  if (startDrawing.value) {
+    drawing.value = true;
+    const pos = getPointerPosition();
+    startX.value = pos.x;
+    startY.value = pos.y;
+  }
+};
+
+const handleMouseUp = () => {
+  if (drawing.value) {
+    drawing.value = false;
+    const pos = getPointerPosition();
+    const width = pos.x - startX.value;
+    const height = pos.y - startY.value;
+    rec.value = { x: startX.value, y: startY.value, width, height };
+  }
+
+  currentWidth.value = 0;
+  currentHeight.value = 0;
+};
+
+const handleMouseMove = () => {
+  if (!drawing.value) return;
+
+  const pos = getPointerPosition();
+  const width = pos.x - startX.value;
+  const height = pos.y - startY.value;
+
+  currentWidth.value = width;
+  currentHeight.value = height;
+};
+const getPointerPosition = () => {
+  return stageRef.value.getStage().getPointerPosition();
+};
 
 watch(pdfUrl, async (newUrl) => {
   if (newUrl) {
@@ -130,7 +166,7 @@ const loadPdfFilesFromLocalStorage = () => {
   const files = localStorage.getItem('pdfFiles');
   if (files) {
     pdfFiles.value = [
-      { name: "Sample PDF", url: "https://pdfobject.com/pdf/sample.pdf" }
+      { name: "Sample PDF", url: "\sample-3.pdf" }
     ];
   }
 };
@@ -174,12 +210,26 @@ const renderPdf = async (url) => {
 
       canvas.width = viewport.width;
       canvas.height = viewport.height;
-      container.appendChild(canvas);
+      if (container) {
+        container.appendChild(canvas);
+      } else {
+        console.error('Container element is null');
+        return;
+      }
 
-      const renderContext = { canvasContext: context, viewport: viewport };
-      await page.render(renderContext).promise;
+      if (context) {
+        const renderContext = { canvasContext: context, viewport: viewport };
+        await page.render(renderContext).promise;
+      } else {
+        console.error('Canvas context is null');
+        return;
+      }
 
-      pages.value.push({ num: pageNum, canvas });
+      if (pages && pages.value) {
+        pages.value.push({ num: pageNum, canvas });
+      } else {
+        console.error('Pages array is null or undefined');
+      }
     }
   } catch (error) {
     console.error('Error rendering PDF:', error.message);
@@ -262,7 +312,6 @@ const updateSignatureArea = (area) => {
   // Implement logic for updating a specific signature area
 };
 </script>
-
 
 <style scoped>
 @import '@/assets/Display.css';

@@ -37,12 +37,12 @@
               <option v-for="category in categories" :key="category.id" :value="category.directory_name">
                 {{ category.directory_name }}
               </option>
-              <option value="new">Thêm danh mục mới...</option>
+              <option value="new">+ Thêm danh mục mới</option>
             </select>
-            <button class="btn btn-primary" @click="addCategory">Thêm mới</button>
           </div>
           <div v-if="selectedCategory === 'new'" class="mt-2">
             <input v-model="newCategory" type="text" class="form-control" placeholder="Tên danh mục mới" required />
+            <button class="btn btn-primary mt-2" @click="addCategory">Thêm mới</button>
           </div>
         </div>
 
@@ -80,24 +80,23 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios'; 
+import axios from 'axios';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 import NavBar from '../layout/Processing.vue';
-// Constants for file size units
+
 const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB'];
 
-// Reactive states and refs
-const uploadedFiles = reactive([]); 
-const pdfFiles = ref([]); // Stores uploaded PDF files
-const categories = ref([]); // Stores available categories
-const selectedCategory = ref(''); // Holds the selected category
-const newCategory = ref(''); // For adding new categories
-const folders = ref([]); // Stores folder options
-const selectedFolder = ref(''); // Holds the selected folder
-const newFolder = ref(''); // For adding new folders
+const uploadedFiles = reactive([]);
+const pdfFiles = ref([]); 
+const categories = ref([]); 
+const selectedCategory = ref(''); 
+const newCategory = ref(''); 
+const folders = ref([]); 
+const selectedFolder = ref(''); 
+const newFolder = ref(''); 
 
-const router = useRouter(); // Vue router
+const router = useRouter(); 
 
 // Helper function to format file sizes
 const formatFileSize = (size) => {

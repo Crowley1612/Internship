@@ -1,17 +1,16 @@
 <template>
-
   <div class="wrapper">
     <div class="image-container">
       <img src="https://ca2sp.nacencomm.vn/assets/bg-8d54c696.png" alt="Background Image" class="background-image" />
       <div class="text-overlay">
-        <h1>Trải nghiệm ký số trên di động<br>với Ca2 Remote Signing</h1>
+        <b><h1>Trải nghiệm ký số trên di động<br>với Ca2 Remote Signing</h1></b>
         <p>Ký ngay trên thiết bị di động, không cần USB Token. Giúp bạn làm việc từ xa<br>tại một nơi duy nhất</p>
       </div>
     </div>
     <div class="inner">
       <div class="login-box container bg-light p-4 rounded shadow-sm">
-
-        <h1 class="text-center">Chào mừng bạn trở lại!</h1>
+        <img src="C:\Users\Shinei\Desktop\Vuejs\ca2-platform\src\assets\download.png" alt="Logo" class="logo mb-4" />
+        <h1 class="text-center"><b>Đăng nhập</b></h1>
         <a-form :model="formState" name="normal_login" class="login-form" @finish="onFinish"
           @finishFailed="onFinishFailed">
           <div class="form-group">
@@ -34,11 +33,9 @@
               </a-input-password>
             </a-form-item>
           </div>
-          <router-link class="nav-link text-white" to="/Trang-chu" exact-active-class="active-link">
-            <button type="submit" class="btn btn-primary w-100 mt-3">
-              Đăng nhập
-            </button>
-          </router-link>
+          <button type="submit" class="btn btn-primary w-100 mt-3">
+            Đăng nhập
+          </button>
           <div class="mt-3 text-center">
             <router-link to="/Quen-mat-khau">Quên mật khẩu?</router-link>
           </div>
@@ -76,29 +73,117 @@
 </template>
 
 <script setup>
-import { Field, Form, defineRule, useForm } from 'vee-validate';
-import { ref } from 'vue';
-import { reactive, computed } from 'vue';
+import { reactive, onMounted } from 'vue';
+import {defineRule} from 'vee-validate';
+import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
+import { XMLParser } from 'fast-xml-parser';
+import { useStore } from 'vuex';
+const router = useRouter();
+const store = useStore();
+
 const formState = reactive({
   username: '',
   password: '',
   remember: true,
 });
-const onFinish = values => {
-  console.log('Success:', values);
+
+// Convert XML to JSON function
+const convertXmlToJson = (xmlData) => {
+  const options = {
+    attributeNamePrefix: "",
+    ignoreAttributes: false,
+  };
+
+  const parser = new XMLParser();
+  return parser.parse(xmlData, options);
+}
+
+
+const Signin = async (params) => {
+  const { username, password } = params;
+  try {
+    const soapRequest = `
+      <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+        <soap12:Body>
+          <Dangnhap xmlns="http://tempuri.org/">
+            <Email>${username}</Email>
+            <Matkhau>${password}</Matkhau>
+          </Dangnhap>
+        </soap12:Body>
+      </soap12:Envelope>`;
+
+    const response = await axios({
+      baseURL: `https://apiedoc.nacencomm.vn/apiEdoc.asmx`,
+      method: "post",
+      headers: {
+        "Content-Type": "application/soap+xml;charset=UTF-8",
+      },
+      data: soapRequest,
+    });
+
+    const dataJson = convertXmlToJson(response.data);
+    const DocumentElement =
+      dataJson["soap:Envelope"]["soap:Body"]["DangnhapResponse"]["DangnhapResult"];
+    console.log(DocumentElement);
+    return DocumentElement;
+  } catch (error) {
+    console.error(error);
+    return "0";
+  }
 };
-const onFinishFailed = errorInfo => {
+
+const onFinish = async () => {
+  try {
+    const result = await Signin({
+      username: formState.username,
+      password: formState.password,
+    });
+
+    if (result === 1) {
+      console.log("Login successful:", result);
+      store.commit('setUsername', formState.username);
+      store.commit('setPassword', formState.password);
+      router.push({ path: '/Trang-chu'});
+    } else {
+      console.error("Login failed:", result);
+      switch (result) {
+        case 0:
+          errorMessage.value = "Tài khoản không tồn tại.";
+          break;
+        case -1:
+          errorMessage.value = "Lỗi hệ thống.";
+          break;
+        case -2:
+          errorMessage.value = "Tài khoản chưa được kích hoạt.";
+          break;
+        case -3:
+          errorMessage.value = "Tài khoản đã bị khóa.";
+          break;
+        case -4:
+          errorMessage.value = "Sai thông tin đăng nhập quá 5 lần. Tài khoản đã bị khóa.";
+          break;
+        case -5:
+          errorMessage.value = "Sai thông tin đăng nhập.";
+          break;
+        default:
+          errorMessage.value = "Đăng nhập thất bại. Vui lòng thử lại.";
+      }
+      isErrorDialogVisible.value = true;
+    }
+  } catch (error) {
+    console.error("An error occurred during login:", error);
+  }
+};
+
+const onFinishFailed = (errorInfo) => {
   console.log('Failed:', errorInfo);
 };
-const disabled = computed(() => {
-  return !(formState.username && formState.password);
-});
-// Define custom rules
+
+// Define custom validation rules
 defineRule('required', (value) => {
-  if (!value) {
-    return 'Hãy nhập thông tin này';
-  }
-  return true;
+  return value ? true : 'Hãy nhập thông tin này';
 });
 
 defineRule('email', (value) => {
@@ -111,59 +196,35 @@ defineRule('email', (value) => {
   return true;
 });
 
-// Form state
-const form = ref({
-  email: '',
-  password: '',
-});
-
-// Password field type and form rules
-const passwordFieldType = ref('password');
-const emailRules = 'required|email';
-const passwordRules = 'required';
-
-// Error tracking
-const showErrors = ref({
-  email: false,
-  password: false,
-});
-
-// Access form methods with useForm
-const { validateField, validate } = useForm();
-
-// Handle input and update error state
-const handleInput = (field, meta) => {
-  showErrors.value[field] = meta.errors.length > 0 && !meta.value;
-  meta.touched = true;
-  validateField(field);
-};
-
-// Handle blur and update error state
-const handleBlur = (field, meta) => {
-  showErrors.value[field] = meta.errors.length > 0;
-};
-
-// Handle form submission
-const handleSubmit = () => {
-  validate().then(success => {
-    if (success) {
-      console.log('Form submitted', form.value);
-    } else {
-      console.log('Validation failed');
-    }
+// Google login function
+const loginWithGoogle = () => {
+  const auth2 = window.gapi.auth2.getAuthInstance();
+  auth2.signIn().then(googleUser => {
+    const profile = googleUser.getBasicProfile();
+    console.log('ID:', profile.getId());
+    console.log('Name:', profile.getName());
+    console.log('Image URL:', profile.getImageUrl());
+    console.log('Email:', profile.getEmail());
+    // Send the token to the server for further processing if needed
+  }).catch(error => {
+    console.error('Google Sign-In error:', error);
   });
 };
 
-// Toggle password visibility
-const togglePasswordVisibility = () => {
-  passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
-};
-
-// Google login function
-const loginWithGoogle = () => {
-  console.log('Login with Google');
-};
+onMounted(() => {
+  const script = document.createElement('script');
+  script.src = 'https://apis.google.com/js/platform.js';
+  script.onload = () => {
+    window.gapi.load('auth2', () => {
+      window.gapi.auth2.init({
+        client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+      });
+    });
+  };
+  document.head.appendChild(script);
+});
 </script>
+
 
 <style scoped>
 #components-form-demo-normal-login .login-form {
@@ -185,7 +246,6 @@ const loginWithGoogle = () => {
   justify-content: center;
   align-items: center;
   background-color: #f0f2f5;
-  /* Softer background color */
 }
 
 .inner {
@@ -194,7 +254,6 @@ const loginWithGoogle = () => {
   align-items: center;
   flex-direction: column;
   gap: 20px;
-  /* Adds spacing between elements */
 }
 
 .image-container {
@@ -223,23 +282,17 @@ const loginWithGoogle = () => {
   color: #ffffff;
   padding: 20px;
   background: rgba(0, 0, 0, 0.5);
-  /* Semi-transparent background */
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  /* Add shadow for depth */
   max-width: 80%;
-  /* Prevents text from stretching too wide */
 }
 
 .login-box {
-  background-color: #F5F5F5;
+  background-color: #ffffff;
   padding: 40px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  /* Slightly stronger shadow */
   width: 400px;
-  /* Fixed width for better alignment */
   max-width: 90%;
-  /* Ensure responsiveness */
   height: auto;
   box-sizing: border-box;
   display: flex;
@@ -247,8 +300,12 @@ const loginWithGoogle = () => {
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  /* Rounded corners */
   margin: 20px;
+}
+
+.logo {
+  width: 150px;
+  height: auto;
 }
 
 .password-toggle {
@@ -276,7 +333,6 @@ const loginWithGoogle = () => {
 
 a i {
   margin-right: 8px;
-  /* Adjust the spacing as needed */
 }
 
 .btn-toggle {

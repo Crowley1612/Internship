@@ -504,9 +504,9 @@ th .fa-search {
   margin-top: 0px;
 }
 .custom-dropdown-button {
-  background-color: #007bff;
   color: white;
   border: none;
+  width: auto;
 }
 
 .page-title {
