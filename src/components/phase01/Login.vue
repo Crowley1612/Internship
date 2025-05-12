@@ -9,7 +9,7 @@
     </div>
     <div class="inner">
       <div class="login-box container bg-light p-4 rounded shadow-sm">
-        <img src="C:\Users\Shinei\Desktop\Vuejs\ca2-platform\src\assets\download.png" alt="Logo" class="logo mb-4" />
+     
         <h1 class="text-center"><b>Đăng nhập</b></h1>
         <a-form :model="formState" name="normal_login" class="login-form" @finish="onFinish"
           @finishFailed="onFinishFailed">
