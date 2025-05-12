@@ -3,13 +3,13 @@
     <div class="image-container">
       <img src="https://ca2sp.nacencomm.vn/assets/bg-8d54c696.png" alt="Background Image" class="background-image" />
       <div class="text-overlay">
-        <b><h1>Trải nghiệm ký số trên di động<br>với Ca2 Remote Signing</h1></b>
+        
         <p>Ký ngay trên thiết bị di động, không cần USB Token. Giúp bạn làm việc từ xa<br>tại một nơi duy nhất</p>
       </div>
     </div>
     <div class="inner">
       <div class="login-box container bg-light p-4 rounded shadow-sm">
-     
+  
         <h1 class="text-center"><b>Đăng nhập</b></h1>
         <a-form :model="formState" name="normal_login" class="login-form" @finish="onFinish"
           @finishFailed="onFinishFailed">
