@@ -19,7 +19,7 @@
       "nguoiGui": "dochuc@cavn.vn",
       "nguoiNhan": "hangdtt@cavn.vn",
       "thoiGianCapNhat": "05-06-2024 18:08:48",
-      "trangThai": "Chưa hoàn tất",
+      "trangThai": "Đang chờ ký",
       "trinhTuKy": 4,
       "danhMuc": "Danh mục hệ thống",
       "ghiChu": "",
@@ -389,19 +389,6 @@
       "ghiChu": "",
       "isChecked": false,
       "id": "f023"
-    },
-    {
-      "maVB": 72931,
-      "tenVanBan": "BL_07-2024_Linda_Johnson_22ZMGGND.pdf",
-      "nguoiGui": "linda.johnson@example.com",
-      "nguoiNhan": "david.wilson@example.com",
-      "thoiGianCapNhat": "15-07-2024 10:15:20",
-      "trangThai": "Chưa hoàn tất",
-      "trinhTuKy": 5,
-      "danhMuc": "Danh mục hệ thống",
-      "ghiChu": "",
-      "isChecked": false,
-      "id": "cad1"
     }
   ]
 }

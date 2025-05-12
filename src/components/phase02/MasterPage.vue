@@ -222,7 +222,6 @@
 
 <script>
 import axios from 'axios';
-import { debounce } from 'lodash';
 import Sidebar from '../layout/Sidebar.vue';
 import Header from '../layout/Header.vue';
 export default {
@@ -293,7 +292,6 @@ export default {
       return 'Chào buổi tối,';
     },
     totalPages() {
-      // Tính toán tổng số trang dựa trên tổng số item và số lượng item trên mỗi trang
       return Math.ceil(this.totalItems / this.itemsPerPage);
     },
     filteredDocuments() {
@@ -409,14 +407,11 @@ export default {
       return date >= start && date <= end;
     },
     changePage(page) {
-      // Phương thức chuyển trang
       this.currentPage = page;
-      // Gọi API hoặc làm gì đó để cập nhật danh sách item của trang hiện tại
       console.log(`Current page: ${this.currentPage}`);
     },
     updatePageSize() {
-      // Khi số lượng item trên mỗi trang thay đổi, cần tính lại tổng số trang và đặt lại currentPage
-      this.currentPage = 1; // Đặt lại trang về 1 mỗi khi thay đổi số lượng item trên mỗi trang
+      this.currentPage = 1;
       console.log(`Items per page: ${this.itemsPerPage}`);
     },
     filterDocuments() {

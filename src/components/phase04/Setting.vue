@@ -81,8 +81,8 @@
                                 <div class="long-info">
                                     <label>Thông tin chứng thư số:</label>
                                     <textarea readonly>
-C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
-0.9.2342.19200300.100.1=CCCCD:001191009538, O=Đỗ Thị Thu Hằng, E={{ user.email }}, CN=Đỗ Thị Thu Hằng
+C=VN, ST=Hồ Chí Minh, L= Bình Tân, Hồ Chí Minh,
+0.9.2342.19200300.100.1=CCCCD:001191009538, O=A Nguyễn Hoàng Phúc, E={{ user.email }}, CN=A Nguyễn Hoàng Phúc
                                     </textarea>
                                 </div>
                             </div>
@@ -128,38 +128,34 @@ C=VN, ST=Hà Nội, L=TDP Văn Trì 4, Minh Khai, Bắc Từ Liêm, Hà Nội,
                                 </div>
                             </div>
                         </a-tab-pane>
-                        <!-- Đổi mật khẩu -->
+                        <!-- Đổi mật khẩu --> 
                         <a-tab-pane key="3" tab="Đổi mật khẩu">
-                            <div class="change-password-container" @finish="onFinish">
+                            <div class="change-password-container">
                                 <h2>Thay đổi mật khẩu</h2>
                                 <p>Mật khẩu cần có tối thiểu 6 ký tự, bao gồm số, chữ cái thường, chữ in hoa, ký tự đặc
                                     biệt.</p>
                                 <div class="form-change-pass">
-                                    <a-form ref="formRef" name="custom-validation" :model="formState" :rules="rules"
-                                        v-bind="layout" @finish="handleFinish" @validate="handleValidate"
-                                        @finishFailed="handleFinishFailed">
-                                        <!-- Old Password Field -->
+                                    <a-form ref="formRef" name="custom-validation" :model="formState" 
+                                    :rules="rules"
+                                        v-bind="layout" @finish="onFinish">
                                         <label style="margin-right: 20px;">Nhập mật khẩu cũ:</label>
-                                        <a-form-item has-feedback name="oldPass" style="margin-right: 20px;">
-                                            <a-input v-model:value="formState.oldPass" type="password"
+                                        <a-form-item name="oldPass" style="margin-right: 20px;">
+                                            <a-input v-model:value="formState.oldPass" type="showPassword"
                                                 autocomplete="off" />
                                         </a-form-item>
 
-                                        <!-- Password Field -->
                                         <label style="margin-right: 20px;">Mật khẩu mới:</label>
-                                        <a-form-item has-feedback name="pass">
-                                            <a-input v-model:value="formState.pass" type="password"
+                                        <a-form-item  name="pass">
+                                            <a-input v-model:value="formState.pass" type="showPassword"
                                                 autocomplete="off" />
                                         </a-form-item>
 
-                                        <!-- Confirm Password Field -->
                                         <label style="margin-right: 20px;">Xác nhận mật khẩu:</label>
                                         <a-form-item has-feedback name="checkPass">
-                                            <a-input v-model:value="formState.checkPass" type="password"
+                                            <a-input v-model:value="formState.checkPass" type="showPassword"
                                                 autocomplete="off" />
                                         </a-form-item>
 
-                                        <!-- Submit and Reset Button -->
                                         <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
                                             <a-button style="margin-left: 0px;" @click="resetForm">Huỷ</a-button>
                                             <a-button style="margin-left: 10px;" type="primary" html-type="submit">Xác
@@ -335,7 +331,6 @@ const resetPassword = async (params) => {
     }
 };
 
-// Form validation rules
 const rules = {
     oldPass: [
         {
@@ -367,6 +362,7 @@ const rules = {
                     throw new Error('Password must contain at least one uppercase letter');
                 if (!hasSpecialChar.test(value))
                     throw new Error('Password must contain at least one special character');
+                return Promise.resolve();
             },
             trigger: 'change',
         },
@@ -377,16 +373,18 @@ const rules = {
                 if (!value) throw new Error('Please input the password again');
                 if (value !== formState.pass)
                     throw new Error("Passwords don't match");
+
+                return Promise.resolve();
             },
             trigger: 'change',
         },
     ],
 };
 
-// Form actions
 const formRef = ref(null);
 const onFinish = async () => {
     try {
+
         const result = await resetPassword({
             userEmail: user.email,
             oldPassword: formState.oldPass,
@@ -395,6 +393,7 @@ const onFinish = async () => {
 
         if (result === 1) {
             console.log('Password reset successful');
+
         } else {
             console.error('Password reset failed');
         }

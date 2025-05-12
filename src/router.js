@@ -26,7 +26,6 @@ import BottomButton from "./components/layout/BottomButton.vue";
 import Processing from "./components/layout/Processing.vue";
 //Test
 import test from "./components/testFile/test.vue";
-import Test02 from "./components/testFile/Test02.vue";
 import { set } from "lodash";
 const routes = [
   {
@@ -137,11 +136,6 @@ const routes = [
     name: "Test",
     component: test,
     path: "/Test",
-  },
-  {
-    name: "Test02",
-    component: Test02,
-    path: "/Test02",
   },
 ];
 
