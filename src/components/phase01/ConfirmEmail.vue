@@ -2,7 +2,7 @@
   <div class="background">
     <div class="modal-box">
       <div class="logo">
-        <img src="C:\Users\Shinei\Desktop\Vuejs\ca2-platform\src\assets\download.png" alt="Logo" />
+
       </div>
       <h2>Gửi yêu cầu đăng ký thành công</h2>
       <p>

@@ -1,7 +1,7 @@
 <template>
   <div class="nav-bar col-md-2 text-white p-3">
     <div class="logo mb-3">
-      <img src="/src/assets/download.png" alt="Logo" />
+      
     </div>
     <nav class="navbar">
       <ul class="nav flex-column">
